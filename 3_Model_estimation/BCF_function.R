@@ -16,7 +16,7 @@
 BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, errordistribution = "normal", sensitivity_parameters, ps_estimate_inclusion = "both"){
   library(bcf)
   
-  bcf(
+  bcf_estimates <- bcf(
     outcome,
     treatment,
     cvars,
@@ -44,6 +44,6 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     use_tauscale = TRUE
   )
   
-  
+  return(bcf_estimates)
   
   }
