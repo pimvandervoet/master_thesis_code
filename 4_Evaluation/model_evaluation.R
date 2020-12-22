@@ -1,0 +1,1 @@
+#Evaluation function - need to prepare beforehand what I want to analyse - probably function on CATE plotting; credibility intervals, means, etc.S
