@@ -14,6 +14,8 @@ HRS_data_unprepared <- data_loader(filename = "Data/merged_data.dta")
 
 #Estimate the propensity scores and provide analysis of these estimates
 
+#Provide insights on the estimated propensity scores
+
 #Estimate the posterior treatment function with BCF - basics
 
 #Evaluation of results
