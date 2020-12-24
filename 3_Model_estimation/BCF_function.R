@@ -2,7 +2,7 @@
 #'
 #' @description  This function is used to estimate treatment effects, using the BCF method proposed by Hahn, Murray, Carvalho 2020
 #'
-#' Output: @return BCF_results ....
+#' Output: @return results_for_posterior_inference .... list containing posterior draws and the moderating variables to do posterior inferencer
 #' Input:  @param cvars ... control variables used in the model
 #' @param outcome ... (health) outcome of interest 
 #' @param treatment ....
@@ -24,8 +24,8 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
   bcf_estimates <- bcf(
     y = outcome,
     z = treatment,
-    x_control = cvars,
-    x_moderate = mvars,
+    x_control = cvars_matrix,
+    x_moderate = mvars_matrix,
     pihat = ps_estimates,
     nburn = 2000L,
     nsim = 4000L,
@@ -49,6 +49,8 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     use_tauscale = TRUE
   )
   
-  return(bcf_estimates)
+  #Return both posterior results and features of all individuals to do posterior inference
+  results_for_posterior_inference <- list("posterior_draws" = bcf_estimates, "effect_moderators" = mvars)
+  return(results_for_posterior_inference)
   
   }
