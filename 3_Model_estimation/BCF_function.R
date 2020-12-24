@@ -15,7 +15,12 @@
 #' 
 BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, errordistribution = "normal", sensitivity_parameters = "null", ps_estimate_inclusion = "both"){
   library(bcf)
+  library(dbarts)
+  #First transform control and moderator variables to matrix from dataframe, drops columsn that are constant or factors levels without instances
+  cvars_matrix <- makeModelMatrixFromDataFrame(cvars, drop = TRUE) 
+  mvars_matrix <- makeModelMatrixFromDataFrame(mvars, drop = TRUE)
   
+  #Obtain model estimates using the bcf function of Hahn, Carvlho, Murray 2020
   bcf_estimates <- bcf(
     y = outcome,
     z = treatment,
@@ -32,7 +37,7 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     base_control = 0.95,
     power_control = 2,
     ntree_moderate = 50,
-    sd_moderate = sd(y),
+    sd_moderate = sd(outcome),
     base_moderate = 0.25,
     power_moderate = 3,
     nu = 3,
