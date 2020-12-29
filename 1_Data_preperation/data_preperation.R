@@ -62,13 +62,13 @@ data_seperator <- function(data = raw_data, controL_columns = NA, moderator_colu
 #'
 data_formatter <- function(non_formatted_data = NA) {
   if (!is.na(non_formatted_data)) {
-    
+    #Verander hier de coding van de data (maak factors enzo)
   } else{
     (print("No data has been provided"))
   }
 }
 
-#' general_data_preperation
+#' define_racial_discrimination
 #'
 #'=
 #' @description   This function puts the data in the right format to be used for analysis
@@ -80,4 +80,41 @@ data_formatter <- function(non_formatted_data = NA) {
 #'        @param method .... method used to define racial discrimination. Default is "Proposal" 
 define_racial_discrimination <- function(data = data_cleaned, method = "Proposal"){
 
-  }
+  #Definition van racial discrimination is based on q 29 and q 30. Must become a binary variable
+  #Base this on q30 if at least one of the answers is race or ethnicity
+}
+
+
+#' racial_discrimination_analysis
+#' 
+#' @description Provides analysis on racial discrimination seperately
+#' 
+#' Output: @return analysis_racial_discrimination
+#' Input: @param data dataframe with racial discrimination data
+#' @param method .... method used to do this analysis
+#' @param choices ... choices of what analysis to do 
+racial_discrimination_analysis <- function(data = racial_discrimination_data, method = "Proposal", choices = "All" ){
+  
+}
+
+#' general_data_analysis
+#' 
+#' General data anslysis that provides summary tables and other things if needed
+#' 
+#' Output: @return general_analysis
+#' Input: @param input_data ... input data
+#' @param choices ... choices of analysis to do c(means, median etc)
+general_data_analysis <- function(input_data = data_to_analyse, choices = "All"){
+  
+}
+
+#' missing_data_analysis
+#' 
+#' @description Analysis of missing data and possible imputation if user provided
+#' 
+#' Output: @return missing_data_analysis
+#' Input: @param missing_data ... data with missings
+#' @param imputation ... imputation method
+missing_data_analysis <- function(missing_data = missing_data, imputation = "Multiple imputation"){
+  
+}

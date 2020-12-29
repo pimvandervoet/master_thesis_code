@@ -136,5 +136,13 @@ ps_estimator <-
 #' Input:   @estimated_ps ... propoensity score estimates
 #'          @control_variables ... control variables for which support needs to be checked 
 ps_analysis <- function(estimated_ps, control_variables, ...){
+  #Wat voor analysis is hier nodig
   
+  #Kijk naar de verdeling van de propensity scores
+  #Deel dit op op basis van bepaalde kenmerken
+  #En normaal
+  
+  #Kijk naar de 'accuracy' van de propensity scores
+  
+  #Kijk in hoeverre bepaalde variables zijn meegenomen in het model (mogelijk?)
 }
