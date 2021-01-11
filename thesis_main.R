@@ -6,16 +6,30 @@ set.seed(301297)
 source("0_Data_loading/data_loader.R")
 HRS_data_unprepared <- data_loader(filename = "A_Data_sources/merged_data.dta")
 
-#Basic data treatment 
+#Basic data treatment ####
 source("1_Data_preperation/data_preperation.R")
-#Rename variables
+#Rename all variables
 renamed_HRS_data <- variable_rename(HRS_data_unprepared)
 remove(HRS_data_unprepared)
 
-#Format variables
+#Format all variables BUT treatment variables
 formatted_data <- data_formatter(renamed_HRS_data)
 remove(renamed_HRS_data)
 
+#Make treatment a binary variable
+
+#Add other variables
+
+
+#Create seperations of data and select which variables are used as control/moderator variables
+controlvariables <- c("")
+moderatorvariables <- c("")
+outcomevariables <- c("")
+treatmentvariables <- c("")
+
+data_seperated <- data_seperator(formatted_data, controlvariables, moderatorvariables, treatmentvariables, outcomevariables)
+
+#Basic insights####
 
 
 

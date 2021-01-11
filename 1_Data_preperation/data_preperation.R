@@ -11,28 +11,28 @@
 #' @param moderator_variables ... column numbers of moderator variables
 #' @param treatment_variables ... column numbers of treatment variables
 #' @param outcomes .... column numbers of outcome variables
-data_seperator <- function(data = raw_data, controL_columns = NA, moderator_columns = NA, treatment_columns = NA, outcome_columns = NA){
+data_seperator <- function(raw_data = unseperated_data, control_columns = NA, moderator_columns = NA, treatment_columns = NA, outcome_columns = NA){
   
   #Make seperate dataframes
-  if(!is.na(control_columns)){
+  if(!is.null(control_columns)){
     control_variables <- raw_data[, control_columns]
   }else{
     control_variables <- NA
   }
   
-  if(!is.na(moderator_columns)){
+  if(!is.null(moderator_columns)){
     moderator_variables <- raw_data[, moderator_columns]
   }else{
     moderator_variables <- NA
   }
   
-  if(!is.na(treatment_columns)){
+  if(!is.null(treatment_columns)){
     treatment <- raw_data[, treatment_columns]
   }else{
     treatment <- NA
   }
   
-  if(!is.na(outcome_columns)){
+  if(!is.null(outcome_columns)){
     outcomes <- raw_data[, outcome_columns]
   }else{
     outcomes <- NA
@@ -134,7 +134,7 @@ data_formatter <- function(non_formatted_data = NA) {
   library(tidyverse)
   
   #Check if input is provided
-  if (!is.na(non_formatted_data)) {
+  if (!is.null(non_formatted_data)) {
     #Create new datamatrix to store formatted data in
     formatted_data <- non_formatted_data
     
@@ -362,13 +362,86 @@ define_variables <- function(data = data_cleaned, method = "Proposal"){
 #' Dependency: data_loader.R
 #'
 #' Output: @return data_incl_racial_discrimination ... data list with variables for racial discrimination accorindg to user input
-#' Input: @param data_cleaned .... cleaned data as obtained from general_data_preperation function
+#' Input: @param data_formatted .... cleaned data as obtained from general_data_preperation function
 #'        @param method .... method used to define racial discrimination. Default is "Proposal" 
-define_racial_discrimination <- function(data = data_cleaned, method = "Proposal"){
-
-  #Definition van racial discrimination is based on q 29 and q 30. Must become a binary variable
-  #Base this on q30 if at least one of the answers is race or ethnicity
-}
+define_racial_discrimination <-
+  function(data_wo_rd = data_formatted,
+           method = "Proposal") {
+    #Check if user provided data
+    if (!is.null(data_wo_rd)) {
+      data_rd_inc <- data_wo_rd
+      #Make empty 'experienced Racial Discrimination' variable
+      data_rd_inc$expRacialDisc <- 10
+      
+      #(For now only) proposal method is implemented to define racial discirmination
+      if (method = "Proposal") {
+        #First format the answer on question 30 as factor such that we can work with it
+        for (i in c(
+          "rDisc1",
+          "rDisc2",
+          "rDisc3",
+          "rDisc4",
+          "rDisc5",
+          "rDisc6",
+          "rDisc7",
+          "rDisc8",
+          "rDisc9",
+          "rDisc10"
+        )) {
+          variable <- data_rd_inc[[i]]
+          variable <- as_factor(variable)
+          
+          #Change factor levels
+          variable <- recode_factor(
+            variable,
+            "1" = "1.your ancestry or national origin",
+            "2" = "2.your gender",
+            "3" = "3.your race",
+            "4" = "4.your age",
+            "5" = "5.your religion",
+            "6" = "6.your weight",
+            "7" = "7.a physical disability",
+            "8" = "8.an aspect of your physical appearance",
+            "9" = "9.your sexual orientation",
+            "10" = "10.your financial status",
+            "11" = "11.other"
+          )
+          
+          #Put formatted version of the variables in the dataframe
+          data_rd_inc[[i]] <- variable
+        }
+        
+        #Fill racial discrimnation variable. For every individual that answers that race AND/OR ancestry/national
+        #origin is one of the reasons for experiencing the experiences of q29 set racial discrimination is 1, else 0
+        #Only fill if rDisc1 is not NA as question needs to be filled in at all
+        data_rd_inc <- mutate(data_rd_inc, expRacialDisc = ifelse(is.na(rDisc1), NA, ifelse((
+          rDisc1 == "1.your ancestry or national origin" |
+            rDisc1 == "3.your race" |
+            (rDisc2 == "1.your ancestry or national origin" & !is.na(rDisc2)) |
+            (rDisc2 == "3.your race" & !is.na(rDisc2)) |
+            (rDisc3 == "1.your ancestry or national origin" & !is.na(rDisc3)) |
+            (rDisc3 == "3.your race" & !is.na(rDisc3))|
+            (rDisc4 == "1.your ancestry or national origin" & !is.na(rDisc4)) |
+            (rDisc4 == "3.your race"& !is.na(rDisc4))|
+            (rDisc5 == "1.your ancestry or national origin" & !is.na(rDisc5)) |
+            (rDisc5 == "3.your race" & !is.na(rDisc5)) |
+            (rDisc6 == "1.your ancestry or national origin" & !is.na(rDisc6)) |
+            (rDisc6 == "3.your race" & !is.na(rDisc6)) |
+            (rDisc7 == "1.your ancestry or national origin" & !is.na(rDisc7)) |
+            (rDisc7 == "3.your race" & !is.na(rDisc7)) |
+            (rDisc8 == "1.your ancestry or national origin" & !is.na(rDisc8)) |
+            (rDisc8 == "3.your race" & !is.na(rDisc8)) |
+            (rDisc9 == "1.your ancestry or national origin" & !is.na(rDisc9)) |
+            (rDisc9 == "3.your race" & !is.na(rDisc9)) |
+            (rDisc10 == "1.your ancestry or national origin" & !is.na(rDisc10)) |
+            (rDisc10 == "3.your race" & !is.na(rDisc10)) )
+        ,1, 0)))
+      }
+      return(data_rd_inc)
+    } else {
+      print("Please input data")
+    }
+  }
 
 
 #' racial_discrimination_analysis
