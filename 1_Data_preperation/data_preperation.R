@@ -50,9 +50,79 @@ data_seperator <- function(data = raw_data, controL_columns = NA, moderator_colu
   #Make sure it in the right data format(dataframe?)
 }
 
+#' variable_rename
+#' 
+#' @description This function gives interpretable names to the data pulled from the HRS study
+#' Output:
+#' @return renamed_data
+#' 
+#' Input:
+#' @param non_named_data.... list of dataframe of non-formatted data to be formatted
+#'
+variable_rename <- function(non_named_data = NA){
+  library(dplyr)
+  
+    renamed_data <- non_named_data %>%
+    rename(
+      syBPM1 = pi859, #Outcome variables
+      syBPM2 = pi864,
+      syBPM3 = pi869,
+      wLbs = pi841,
+      hInc = pi834,
+      waist = pi907,
+      everSmoke = pc116, #Control and moderator variables
+      smokenow = pc117,
+      nSmokenow = pc118,
+      nSmokemos = pc123,
+      nDrink = pc129,
+      jobStat.A1 = pj005m1,
+      jobStat.A2 = pj005m2,
+      jobStat.A3 = pj005m3,
+      jobStat.A4 = pj005m4,
+      jobStat.A5 = pj005m5,
+      vigAct = pc223,
+      modAct = pc224,
+      milAct = pc225,
+      mStat12 = r12mstat,
+      mStat13 = r13mstat,
+      smoker12 = r12smoken,
+      smoker13 = r13smoken,
+      drinker12 = s12drink,
+      drinker13 = s13drink,
+      prevRetStat = pz134,
+      race = raracem,
+      sex = px060_r,
+      education = raeduc,
+      moEducation = rameduc,
+      age = pa019,
+      married = pa026,
+      wealthImputed = px092,
+      wealthNotImputed = pz266,
+      q29.A1 = plb029a, #Treatment
+      q29.A2 = plb029b,
+      q29.A3 = plb029c,
+      q29.A4 = plb029d,
+      q29.A5 = plb029e,
+      q29.A6 = plb029f,
+      rDisc1 = plb030m1,
+      rDisc2 = plb030m2,
+      rDisc3 = plb030m3,
+      rDisc4 = plb030m4,
+      rDisc5 = plb030m5,
+      rDisc6 = plb030m6,
+      rDisc7 = plb030m7,
+      rDisc8 = plb030m8,
+      rDisc9 = plb030m9,
+      rDisc10 = plb030m10
+    )
+    
+    return(renamed_data)
+}
+
+
 #' data_formatter
 #' 
-#' @description This function constructs variables for analysis. Custom-made for master thesis analysis. 
+#' @description This function formats variables for analysis. Custom-made for master thesis analysis. Only formats control, moderators and outcomes, not treatment
 #' 
 #' Output:
 #' @return formatted_data
@@ -61,11 +131,121 @@ data_seperator <- function(data = raw_data, controL_columns = NA, moderator_colu
 #' @param non_formatted_data .... list of dataframe of non-formatted data to be formatted
 #'
 data_formatter <- function(non_formatted_data = NA) {
+  #Check if input is provided
   if (!is.na(non_formatted_data)) {
-    #Verander hier de coding van de data (maak factors enzo)
-  } else{
-    (print("No data has been provided"))
+    #Create new datamatrix to store formatted data in
+    formatted_data <- non_formatted_data
+    
+    #Outcome variables are all already double format
+    #Control variables
+    
+    #Binary variables - Change answers to dummy by setting NO = 0, YES = 1, DK, NA AND RF  = NA
+    for (i in c("everSmoke", "smokenow", "married")) {
+      #Select the variable that needs to be changed
+      variable <- formatted_data[[i]]
+      
+      for (observation in 1:dim(formatted_data)[1]){
+        
+        if (!is.na(variable[observation])) {
+          
+          if (variable[observation] == 5) {
+            
+            variable[observation] <- 0
+            
+          } else if (variable[observation] == 8 |
+                     variable[observation] == 9) {
+            
+            variable[observation] <- NA
+          } 
+          
+          #Put it in the formatted_data
+          formatted_data[[i]] <- variable
+        }
+    }
+    
+    }
+    
+    #Binary variables that have been cocded not in 1 and 0's
+    for (i in c("sex")) {
+      #Select the variable that needs to be changed
+      variable <- formatted_data[[i]]
+      
+      for (observation in 1:dim(formatted_data)[1]){
+        
+        if (!is.na(variable[observation])) {
+          
+          if (variable[observation] == 2) {
+            
+            variable[observation] <- 0
+            
+          }
+          
+          #Put it in the formatted_data
+          formatted_data[[i]] <- variable
+        }
+      }
+      
+    }
+    
+    
+    #Numerical/Double variables
+    for (i in c("nSmokenow", "nSmokemos", "nDrink")) {
+      #Select the variable that needs to be changed
+      variable <- formatted_data[[i]]
+      
+      for (observation in 1:dim(formatted_data)[1]){
+        
+        if (!is.na(variable[observation])) {
+          
+        if (variable[observation] == 98 |
+                     variable[observation] == 99) {
+            
+            variable[observation] <- NA
+          } 
+          
+          #Put it in the formatted_data
+          formatted_data[[i]] <- variable
+        }
+      }
+      
+    }
+    
+  
+  
+} else{
+  (print("No data has been provided"))
   }
+}
+
+#' define_racial_discrimination
+#'
+#'=
+#' @description   This function creates variables that were not in the original data
+#'
+#' Dependency: data_loader.R
+#'
+#' Output: @return extended_data_df ... data list with variables for racial discrimination accorindg to user input
+#' Input: @param data_cleaned .... cleaned data as obtained from general_data_preperation function
+#'        @param method .... method used to define racial discrimination. Default is "Proposal" 
+define_variables <- function(data = data_cleaned, method = "Proposal"){
+  
+  #Construct outcome variables of interest
+  systolic_bp_mean <- rowMeans(data_cleaned[,c("pi859", "pi864", "pi869")])
+  BMI <- data_cleaned[, "pi841"] / (data_cleaned[, "pi834"] ^ 2) * 703 #703 is correction factor for inches and pounds
+  
+  # 
+  #
+  
+  #Major life events
+  quit_smoking  
+  quit_drinking 
+  divorced 
+  widowed
+  
+  
+  #Construct 
+  
+  
 }
 
 #' define_racial_discrimination

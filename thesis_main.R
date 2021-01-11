@@ -1,18 +1,18 @@
 #Set working directory
-setwd("C:/Users/pimva/Documents/Studie/Thesis/Git/masterthesis")
+setwd("C:/Users/pimva/Documents/Studie/Thesis/Programming")
 set.seed(301297)
 
 #Read in data from stata file (note that this is an extraction of variables from the HRS)
-source("Data_preperation/data_loader.R")
-HRS_data_unprepared <- data_loader(filename = "Data/merged_data.dta")
+source("0_Data_loading/data_loader.R")
+HRS_data_unprepared <- data_loader(filename = "A_Data_sources/merged_data.dta")
 
-#Provide initial insights on the data (missings, distributions etc.)
+#Provide initial insights on the data (missings, distributions etc.) 
 
 #Prepare the data by treating missings, constructing subsets, creating new variables
 
 #Provide insights again, but now with the "cleaned data" 
 
-#Estimate the propensity scores and provide analysis of these estimates
+#Estimate the propensity scores and provide analysis of these estimates (we need to normalize somewhere - also need to oversample propensity scores!)
 
 #Provide insights on the estimated propensity scores
 
