@@ -6,6 +6,19 @@ set.seed(301297)
 source("0_Data_loading/data_loader.R")
 HRS_data_unprepared <- data_loader(filename = "A_Data_sources/merged_data.dta")
 
+#Basic data treatment 
+source("1_Data_preperation/data_preperation.R")
+#Rename variables
+renamed_HRS_data <- variable_rename(HRS_data_unprepared)
+remove(HRS_data_unprepared)
+
+#Format variables
+formatted_data <- data_formatter(renamed_HRS_data)
+remove(renamed_HRS_data)
+
+
+
+
 #Provide initial insights on the data (missings, distributions etc.) 
 
 #Prepare the data by treating missings, constructing subsets, creating new variables

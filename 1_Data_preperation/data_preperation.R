@@ -131,6 +131,8 @@ variable_rename <- function(non_named_data = NA){
 #' @param non_formatted_data .... list of dataframe of non-formatted data to be formatted
 #'
 data_formatter <- function(non_formatted_data = NA) {
+  library(tidyverse)
+  
   #Check if input is provided
   if (!is.na(non_formatted_data)) {
     #Create new datamatrix to store formatted data in
@@ -144,25 +146,21 @@ data_formatter <- function(non_formatted_data = NA) {
       #Select the variable that needs to be changed
       variable <- formatted_data[[i]]
       
-      for (observation in 1:dim(formatted_data)[1]){
-        
+      for (observation in 1:dim(formatted_data)[1]) {
         if (!is.na(variable[observation])) {
-          
           if (variable[observation] == 5) {
-            
             variable[observation] <- 0
             
           } else if (variable[observation] == 8 |
                      variable[observation] == 9) {
-            
             variable[observation] <- NA
-          } 
+          }
           
-          #Put it in the formatted_data
-          formatted_data[[i]] <- variable
         }
-    }
-    
+      }
+      
+      #Put it in the formatted_data
+      formatted_data[[i]] <- variable
     }
     
     #Binary variables that have been cocded not in 1 and 0's
@@ -170,21 +168,18 @@ data_formatter <- function(non_formatted_data = NA) {
       #Select the variable that needs to be changed
       variable <- formatted_data[[i]]
       
-      for (observation in 1:dim(formatted_data)[1]){
-        
+      for (observation in 1:dim(formatted_data)[1]) {
         if (!is.na(variable[observation])) {
-          
           if (variable[observation] == 2) {
-            
             variable[observation] <- 0
             
           }
           
-          #Put it in the formatted_data
-          formatted_data[[i]] <- variable
         }
       }
       
+      #Put it in the formatted_data
+      formatted_data[[i]] <- variable
     }
     
     
@@ -193,27 +188,138 @@ data_formatter <- function(non_formatted_data = NA) {
       #Select the variable that needs to be changed
       variable <- formatted_data[[i]]
       
-      for (observation in 1:dim(formatted_data)[1]){
-        
+      for (observation in 1:dim(formatted_data)[1]) {
         if (!is.na(variable[observation])) {
-          
-        if (variable[observation] == 98 |
-                     variable[observation] == 99) {
-            
+          if (variable[observation] == 98 |
+              variable[observation] == 99) {
             variable[observation] <- NA
-          } 
+          }
           
-          #Put it in the formatted_data
-          formatted_data[[i]] <- variable
+        }
+      }
+      #Put it in the formatted_data
+      formatted_data[[i]] <- variable
+    }
+    
+    #Factors - simple
+    for (i in c(
+      "mStat12",
+      "mStat13",
+      "race",
+      "jobStat.A1",
+      "jobStat.A2",
+      "jobStat.A3",
+      "jobStat.A4",
+      "jobStat.A5"
+    )) {
+      #Select the variable that needs to be changed
+      variable <- formatted_data[[i]]
+      variable <- as_factor(variable)
+      
+      if (i %in% c("jobStat.A1",
+                   "jobStat.A2",
+                   "jobStat.A3",
+                   "jobStat.A4",
+                   "jobStat.A5")) {
+        #Change factor levels
+        variable <- recode_factor(
+          variable,
+          "1" = "1.working now",
+          "2" = "2.unemployed and looking for work",
+          "3" = "3.temporarily laid off",
+          "4" = "4.disabled",
+          "5" = "5.retired",
+          "6" = "6.homemaker",
+          "7" = "7.other",
+          "8" = "8.on sick or leave",
+          "98" = "98.DK",
+          "99" = "99.RF"
+        )
+        #Set Don't knows and refusals to NA
+        for (observation in 1:dim(formatted_data)[1]) {
+          if (!is.na(variable[observation])) {
+            if (variable[observation] == "98.DK" |
+                variable[observation] == "99.RF") {
+              variable[observation] <- NA
+            }
+          }
         }
       }
       
+      #Put it in the formatted_data
+      formatted_data[[i]] <- variable
+      
     }
     
-  
-  
-} else{
-  (print("No data has been provided"))
+    #Ordinal factors - activity
+    for (i in c("vigAct", "modAct", "milAct"))
+    {
+      #Select the variable that needs to be changed
+      variable <- formatted_data[[i]]
+      variable <- as_factor(variable)
+      
+      #Change factor levels - low factor = high activity
+      variable <- recode_factor(
+        variable,
+        "7" = "7.every day",
+        "1" = "1.more than once a week",
+        "2" = "2.once a week",
+        "3" = "3.one to three times a month",
+        "4" = "4.hardly ever or never",
+        "8" = "8.DK",
+        "9" = "9.RF",
+        .ordered = TRUE
+      )
+      
+      #Set Don't knows and refusals to NA
+      for (observation in 1:dim(formatted_data)[1]) {
+        if (!is.na(variable[observation])) {
+          if (variable[observation] == "98.DK" |
+              variable[observation] == "99.RF") {
+            variable[observation] <- NA
+          }
+        }
+      }
+      #Put formatted variable in formatted data
+      formatted_data[[i]] <- variable
+    }
+    
+    #Ordinal factor - education
+    for (i in c("education"))
+    {
+      #Select the variable that needs to be changed (education already has labels on it, ordered automatically - low factor = low education)
+      variable <- formatted_data[[i]]
+      variable <-
+        as_factor(variable, levels = "default", ordered = TRUE)
+      
+      #Put formatted variable in formatted data
+      formatted_data[[i]] <- variable
+    }
+    
+    for (i in c("prevRetStat"))
+    {
+      #Select the variable that needs to be changed (education already has labels on it, ordered automatically - low factor = low education)
+      variable <- formatted_data[[i]]
+      variable <- as_factor(variable)
+      
+      #Recode levels, high factor is now retired
+      variable <- recode_factor(
+        variable,
+        "1" = "1.fully retired",
+        "3" = "3.partially retired",
+        "5" = "5.not retired",
+        .ordered = TRUE
+      )
+      #Put formatted variable in formatted data
+      formatted_data[[i]] <- variable
+    }
+    
+    
+    #Return formatted data set
+    return(formatted_data)
+    
+  } else{
+    (print("No data has been provided"))
   }
 }
 
