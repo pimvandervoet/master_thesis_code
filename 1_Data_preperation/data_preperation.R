@@ -138,7 +138,32 @@ data_formatter <- function(non_formatted_data = NA) {
     #Create new datamatrix to store formatted data in
     formatted_data <- non_formatted_data
     
-    #Outcome variables are all already double format
+    #Outcome variables are all already double format - but need to set unavailble measurements to NA, 993 998 and 999 are not filled in answers, but we also take out unrealistic measurements to be sure 
+    for (i in c("syBPM1", "syBPM2", "syBPM3", "wLbs")){
+      #Select variable that needs to be changed
+      variable <- formatted_data[[i]]
+      
+      for (observation in 1:dim(formatted_data)[1]) {
+        if(!is.na(variable[observation])){
+          if(variable[observation] > 500){
+            variable[observation] <- NA
+          }
+        }
+      }
+    }
+    
+    for (i in c("hInc")){
+      #Select variable that needs to be changed
+      variable <- formatted_data[[i]]
+      
+      for (observation in 1:dim(formatted_data)[1]) {
+        if(!is.na(variable[observation])){
+          if(variable[observation] > 95){
+            variable[observation] <- NA
+          }
+        }
+      }
+    }
     #Control variables
     
     #Binary variables - Change answers to dummy by setting NO = 0, YES = 1, DK, NA AND RF  = NA
@@ -332,27 +357,149 @@ data_formatter <- function(non_formatted_data = NA) {
 #'
 #' Output: @return extended_data_df ... data list with variables for racial discrimination accorindg to user input
 #' Input: @param data_cleaned .... cleaned data as obtained from general_data_preperation function
-#'        @param method .... method used to define racial discrimination. Default is "Proposal" 
-define_variables <- function(data = data_cleaned, method = "Proposal"){
-  
-  #Construct outcome variables of interest
-  systolic_bp_mean <- rowMeans(data_cleaned[,c("pi859", "pi864", "pi869")])
-  BMI <- data_cleaned[, "pi841"] / (data_cleaned[, "pi834"] ^ 2) * 703 #703 is correction factor for inches and pounds
-  
-  # 
-  #
-  
-  #Major life events
-  quit_smoking  
-  quit_drinking 
-  divorced 
-  widowed
-  
-  
-  #Construct 
-  
-  
-}
+#' 
+define_variables <-
+  function(data_cleaned = data) {
+    #Load in package
+    library(dplyr)
+    
+    extended_data <- data_cleaned
+    
+    #First we need to do rowwise operations
+    extended_data_R <- rowwise(extended_data, hhidpn)
+    
+    
+    #Construct outcome variables of interest
+    extended_data_R <-
+      mutate(extended_data_R, syBP_mean = mean(c_across(starts_with("syBPM"))))
+    extended_data_R <-
+      mutate(extended_data_R, BMI = wLbs / (hInc ^ 2) * 703) #703 is correction factor for inches and pounds
+    
+    #Construct control variables of interest
+    
+    #number of cigarettes is 0 when someone says he/she is not a smoker (instead of NA)
+    extended_data_R <-
+      mutate(extended_data_R, nSmokenow = ifelse(smokenow == 0, 0, nSmokenow))
+    extended_data_R <-
+      mutate(extended_data_R, nSmokemos = ifelse(everSmoke == 0, 0, nSmokemos))
+    
+    #everDRink and drink most !@!@!)@*!)@*
+    
+    #simplification of retirement status, workingNow dummy if someone is working or not
+    extended_data_R <-
+      mutate(
+        extended_data_R,
+        workingNow = ifelse(
+          jobStat.A1 == "1.working now" & !is.na(jobStat.A1) |
+            jobStat.A2 == "1.working now" &
+            !is.na(jobStat.A2) |
+            jobStat.A3 == "1.working now" &
+            !is.na(jobStat.A3) |
+            jobStat.A4 == "1.working now" &
+            !is.na(jobStat.A4) |
+            jobStat.A5 == "1.working now" &
+            !is.na(jobStat.A5)
+          ,
+          1,
+          0
+        )
+      )
+    
+    #Impute wealth from previous wave if missing now and make bins of wealth based on quantiles
+    extended_data_R <-
+      mutate(extended_data_R,
+             wealthCalc = ifelse(!is.na(wealthNotImputed), wealthNotImputed, wealthImputed))
+    
+    #Major life events
+    extended_data_R <-
+      mutate(extended_data_R, quit_smoking = ifelse((smoker12 == 1 &
+                                                       smoker13 == 0), 1, 0))
+    extended_data_R <-
+      mutate(extended_data_R, started_smoking = ifelse((smoker13 == 1 &
+                                                          smoker12 == 0), 1, 0))
+    
+    extended_data_R <-
+      mutate(extended_data_R, quit_drinking = ifelse((drinker12 == 1 &
+                                                        drinker13 == 0), 1, 0))
+    extended_data_R <-
+      mutate(extended_data_R, started_drinking = ifelse((drinker13 == 1 &
+                                                           drinker12 == 0), 1, 0))
+    
+    extended_data_R <-
+      mutate(extended_data_R, divorced_or_seperated = ifelse(
+        (
+          mStat12 == "1.married" |
+            mStat12 == "2.married, spouse absent" | mStat12 == "3.partnered"
+        )
+        &
+          (
+            mStat13 == "4.seperated" |
+              mStat13 == "5.divorced" | mStat13 == "6.seperated/divorced"
+          ),
+        1,
+        0
+      ))
+    extended_data_R <-
+      mutate(extended_data_R, widowed = ifelse(
+        (
+          mStat12 == "1.married" |
+            mStat12 == "2.married, spouse absent" | mStat12 == "3.partnered"
+        )
+        &
+          mStat13 == "7.widowed",
+        1,
+        0
+      ))
+    extended_data_R <-
+      mutate(extended_data_R, recently_married_or_partnered = ifelse(
+        (
+          mStat13 == "1.married" |
+            mStat13 == "2.married, spouse absent" | mStat13 == "3.partnered"
+        )
+        &
+          (
+            mStat12 == "4.seperated" |
+              mStat12 == "5.divorced" |
+              mStat12 == "6.seperated/divorced" |
+              mStat12 == "7.widowed" | mStat12 == "8.never married"
+          ),
+        1,
+        0
+      ))
+    
+    extended_data_R <-
+      mutate(extended_data_R, quit_working = ifelse(
+        (
+          prevRetStat == "3.partially retired" |
+            prevRetStat == "5.not retired"
+        ) & ((jobStat.A1 == "5.retired" & !is.na(jobStat.A1))
+             |
+               (jobStat.A2 == "5.retired" & !is.na(jobStat.A2)) |
+               (jobStat.A3 == "5.retired" &
+                  !is.na(jobStat.A3)) |
+               (jobStat.A4 == "5.retired" &
+                  !is.na(jobStat.A4)) |
+               (jobStat.A5 == "5.retired" &
+                  !is.na(jobStat.A1))
+        ),
+        1,
+        0
+      ))
+    #Wealth bins
+    
+    #To make bins we need to go back to non-row-wise data
+    extended_data <- ungroup(extended_data_R)
+    extended_data <-
+      mutate(extended_data, wealth_bin = ntile(wealthCalc, 10)) #make 10 wealth bins -- still need to make ordered factor from this
+    extended_data$wealth_bin <-
+      factor(extended_data$wealth_bin, order = TRUE)
+    
+    #Change bcak to non-row-wise
+    extended_data <- ungroup(extended_Data_R)
+    
+    
+    return(extended_data)
+  }
 
 #' define_racial_discrimination
 #'
