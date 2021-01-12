@@ -370,11 +370,66 @@ define_racial_discrimination <-
     #Check if user provided data
     if (!is.null(data_wo_rd)) {
       data_rd_inc <- data_wo_rd
-      #Make empty 'experienced Racial Discrimination' variable
-      data_rd_inc$expRacialDisc <- 10
-      
-      #(For now only) proposal method is implemented to define racial discirmination
-      if (method = "Proposal") {
+      if (method == "Proposal") {
+        #Check whether individual reports having had any experience of discrimination
+        
+        #FOrmat q29
+        for (i in c("q29.A1",
+                    "q29.A2",
+                    "q29.A3",
+                    "q29.A4",
+                    "q29.A5",
+                    "q29.A6")) {
+          variable <- data_rd_inc[[i]]
+          variable <- as_factor(variable)
+          
+          #Change factor levels
+          variable <- recode_factor(
+            variable,
+            "1" = "1.almost everyday",
+            "2" = "2.at least once a week",
+            "3" = "3.a few times a month",
+            "4" = "4.a few times a year",
+            "5" = "5.less than once a year",
+            "6" = "6.never",
+            .ordered = TRUE
+          )
+          
+          #Put formatted version of the variables in the dataframe
+          data_rd_inc[[i]] <- variable
+        }
+        
+        data_rd_inc <-
+          mutate(data_rd_inc, expDisc = ifelse((
+            is.na(q29.A1) &
+              is.na(q29.A2) &
+              is.na(q29.A3) &
+              is.na(q29.A4) &
+              is.na(q29.A5) &
+              is.na(q29.A6)
+          ) ,
+          NA,
+          ifelse((
+            (q29.A1 == "6.never" & !is.na(q29.A1)) &
+              (q29.A2 == "6.never" &
+                 !is.na(q29.A2)) &
+              (q29.A3 == "6.never" &
+                 !is.na(q29.A3)) &
+              (q29.A4 == "6.never" &
+                 !is.na(q29.A4)) &
+              (q29.A5 == "6.never" &
+                 !is.na(q29.A5)) &
+              (q29.A6 == "6.never" &
+                 !is.na(q29.A6))
+          )
+          , 0, 1)
+          ))
+        
+        
+        #Check whether individual reports having had any experience of racial discrimination, given that the individual reports experiences of discrimination in general
+        
+        data_rd_inc$expRacialDisc <- NA
+        
         #First format the answer on question 30 as factor such that we can work with it
         for (i in c(
           "rDisc1",
@@ -414,32 +469,71 @@ define_racial_discrimination <-
         #Fill racial discrimnation variable. For every individual that answers that race AND/OR ancestry/national
         #origin is one of the reasons for experiencing the experiences of q29 set racial discrimination is 1, else 0
         #Only fill if rDisc1 is not NA as question needs to be filled in at all
-        data_rd_inc <- mutate(data_rd_inc, expRacialDisc = ifelse(is.na(rDisc1), NA, ifelse((
-          rDisc1 == "1.your ancestry or national origin" |
-            rDisc1 == "3.your race" |
-            (rDisc2 == "1.your ancestry or national origin" & !is.na(rDisc2)) |
-            (rDisc2 == "3.your race" & !is.na(rDisc2)) |
-            (rDisc3 == "1.your ancestry or national origin" & !is.na(rDisc3)) |
-            (rDisc3 == "3.your race" & !is.na(rDisc3))|
-            (rDisc4 == "1.your ancestry or national origin" & !is.na(rDisc4)) |
-            (rDisc4 == "3.your race"& !is.na(rDisc4))|
-            (rDisc5 == "1.your ancestry or national origin" & !is.na(rDisc5)) |
-            (rDisc5 == "3.your race" & !is.na(rDisc5)) |
-            (rDisc6 == "1.your ancestry or national origin" & !is.na(rDisc6)) |
-            (rDisc6 == "3.your race" & !is.na(rDisc6)) |
-            (rDisc7 == "1.your ancestry or national origin" & !is.na(rDisc7)) |
-            (rDisc7 == "3.your race" & !is.na(rDisc7)) |
-            (rDisc8 == "1.your ancestry or national origin" & !is.na(rDisc8)) |
-            (rDisc8 == "3.your race" & !is.na(rDisc8)) |
-            (rDisc9 == "1.your ancestry or national origin" & !is.na(rDisc9)) |
-            (rDisc9 == "3.your race" & !is.na(rDisc9)) |
-            (rDisc10 == "1.your ancestry or national origin" & !is.na(rDisc10)) |
-            (rDisc10 == "3.your race" & !is.na(rDisc10)) )
-        ,1, 0)))
+        data_rd_inc <-
+          mutate(data_rd_inc, expRacialDisc = ifelse(is.na(rDisc1), NA, ifelse((
+            rDisc1 == "1.your ancestry or national origin" |
+              rDisc1 == "3.your race" |
+              (
+                rDisc2 == "1.your ancestry or national origin" & !is.na(rDisc2)
+              ) |
+              (rDisc2 == "3.your race" & !is.na(rDisc2)) |
+              (
+                rDisc3 == "1.your ancestry or national origin" & !is.na(rDisc3)
+              ) |
+              (rDisc3 == "3.your race" & !is.na(rDisc3)) |
+              (
+                rDisc4 == "1.your ancestry or national origin" & !is.na(rDisc4)
+              ) |
+              (rDisc4 == "3.your race" & !is.na(rDisc4)) |
+              (
+                rDisc5 == "1.your ancestry or national origin" & !is.na(rDisc5)
+              ) |
+              (rDisc5 == "3.your race" & !is.na(rDisc5)) |
+              (
+                rDisc6 == "1.your ancestry or national origin" & !is.na(rDisc6)
+              ) |
+              (rDisc6 == "3.your race" & !is.na(rDisc6)) |
+              (
+                rDisc7 == "1.your ancestry or national origin" & !is.na(rDisc7)
+              ) |
+              (rDisc7 == "3.your race" & !is.na(rDisc7)) |
+              (
+                rDisc8 == "1.your ancestry or national origin" & !is.na(rDisc8)
+              ) |
+              (rDisc8 == "3.your race" & !is.na(rDisc8)) |
+              (
+                rDisc9 == "1.your ancestry or national origin" & !is.na(rDisc9)
+              ) |
+              (rDisc9 == "3.your race" & !is.na(rDisc9)) |
+              (
+                rDisc10 == "1.your ancestry or national origin" & !is.na(rDisc10)
+              ) |
+              (rDisc10 == "3.your race" & !is.na(rDisc10))
+          )
+          ,
+          1,
+          0
+          )))
+        
+        #Find individuals that report experiences of racial discirmination overall (fill NA's of expRacialDisc with information from expDisc)
+        data_rd_inc <-
+          mutate(data_rd_inc, expRDAll = ifelse((
+            expRacialDisc == 1 &
+              !is.na(expRacialDisc) &
+              expDisc == 1 &
+              !is.na(expDisc)
+          ) ,
+          1,
+          ifelse(!is.na(expDisc), 0, NA)
+          ))
+        
       }
+      
+      #Return appended matrix
       return(data_rd_inc)
     } else {
       print("Please input data")
+      
     }
   }
 

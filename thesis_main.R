@@ -17,6 +17,8 @@ formatted_data <- data_formatter(renamed_HRS_data)
 remove(renamed_HRS_data)
 
 #Make treatment a binary variable
+racism_added <- define_racial_discrimination(formatted_data)
+remove(formatted_data)
 
 #Add other variables
 
