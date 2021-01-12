@@ -4,7 +4,7 @@ set.seed(301297)
 
 #Read in data from stata file (note that this is an extraction of variables from the HRS)
 source("0_Data_loading/data_loader.R")
-HRS_data_unprepared <- data_loader(filename = "A_Data_sources/merged_data.dta")
+HRS_data_unprepared <- data_loader(filename = "0_Data_loading/merged_data.dta")
 
 #Basic data treatment ####
 source("1_Data_preperation/data_preperation.R")
@@ -21,7 +21,8 @@ racism_added <- define_racial_discrimination(formatted_data)
 remove(formatted_data)
 
 #Add other variables
-
+analysis_dataset <- define_variables(racism_added)
+remove(racism_added)
 
 #Create seperations of data and select which variables are used as control/moderator variables
 controlvariables <- c("")

@@ -1,7 +1,7 @@
 *A) Download data files
-* Fat file 2016 and Longitudinal file from https://hrsdata.isr.umich.edu/data-products/rand
+* Fat file 2016 & 2014 and Longitudinal file from https://hrsdata.isr.umich.edu/data-products/rand
 
-*B) Load Fat file, select variables, remove missing observations on key outcomes of interest
+*B) Load Fat file 2016, select variables, remove missing observations on key outcomes of interest
 set maxvar 100000
 
 use "C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\h16f2a.dta"
@@ -10,18 +10,34 @@ keep plb029a plb029b plb029c plb029d plb029e plb029f plb030m1 plb030m2 plb030m3 
 drop if missing(plb029a) & missing(plb029b) & missing(plb029c) & missing(plb029d) & missing(plb029e) & missing(plb029f) 
 drop if missing(pi859) | missing(pi864) | missing(pi869)| missing(pi834)| missing(pi841)| missing(pi907) 
 
-save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file
+save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2016
 
-*C) Load longitudinal files and select variables
+*C) Load Fat file 2014, select variables
+
+use "C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\h14f2a.dta"
+keep oi859 oi864 oi869 oi907 oi834 oi841 oc118 oc129 hhidpn
+
+save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2014
+
+*D) Merge selection from 2014 into the 2016 Fat file (keep if full match or only in 2016 file)
+
+merge 1:1 hhidpn using  "C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2016"
+keep if _merge == 3 | _merge == 2
+drop _merge
+save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_both
+ 
+*E) Load longitudinal files and select variables
 
 use "C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\randhrs1992_2016v2.dta"
 keep raracem raeduc rameduc r12mstat r13mstat r12smoken r13smoken s12drink s13drink hhidpn 
 
 save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_longitudinal_file 
 
-*D) Merge selections from Fat file and longitudinal file based on hhidpn
+*F) Merge selections from Fat file and longitudinal file based on hhidpn
 
- merge 1:1 hhidpn using  "C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file"
- keep if _merge == 3
+merge 1:1 hhidpn using  "C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_both"
+keep if _merge == 3
 
- save C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\merged_data
+save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\merged_data
+ 
+

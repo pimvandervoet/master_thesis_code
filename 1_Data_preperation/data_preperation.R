@@ -70,11 +70,19 @@ variable_rename <- function(non_named_data = NA){
       wLbs = pi841,
       hInc = pi834,
       waist = pi907,
+      pw_syBPM1 = oi859, #Outcome variables 2014
+      pw_syBPM2 = oi864,
+      pw_syBPM3 = oi869,
+      wLbs_pw = oi841,
+      hInc_pw = oi834,
+      waist_pw = oi907,
       everSmoke = pc116, #Control and moderator variables
       smokenow = pc117,
       nSmokenow = pc118,
+      nSmokepw = oc118,
       nSmokemos = pc123,
       nDrink = pc129,
+      nDrink_pw = oc129,
       jobStat.A1 = pj005m1,
       jobStat.A2 = pj005m2,
       jobStat.A3 = pj005m3,
@@ -139,7 +147,7 @@ data_formatter <- function(non_formatted_data = NA) {
     formatted_data <- non_formatted_data
     
     #Outcome variables are all already double format - but need to set unavailble measurements to NA, 993 998 and 999 are not filled in answers, but we also take out unrealistic measurements to be sure 
-    for (i in c("syBPM1", "syBPM2", "syBPM3", "wLbs")){
+    for (i in c("syBPM1", "syBPM2", "syBPM3", "pw_syBPM1", "pw_syBPM2", "pw_syBPM3", "wLbs", "wLbs_pw")){
       #Select variable that needs to be changed
       variable <- formatted_data[[i]]
       
@@ -152,7 +160,7 @@ data_formatter <- function(non_formatted_data = NA) {
       }
     }
     
-    for (i in c("hInc")){
+    for (i in c("hInc", "hInc_pw", "waist", "waist_pw")){ #Out of Range measurements (denoted by 99-190) are currently denoted by NA
       #Select variable that needs to be changed
       variable <- formatted_data[[i]]
       
@@ -209,7 +217,7 @@ data_formatter <- function(non_formatted_data = NA) {
     
     
     #Numerical/Double variables
-    for (i in c("nSmokenow", "nSmokemos", "nDrink")) {
+    for (i in c("nSmokenow", "nSmokepw", "nSmokemos", "nDrink", "nDrink_pw")) {
       #Select the variable that needs to be changed
       variable <- formatted_data[[i]]
       
@@ -355,7 +363,7 @@ data_formatter <- function(non_formatted_data = NA) {
 #'
 #' Dependency: data_loader.R
 #'
-#' Output: @return extended_data_df ... data list with variables for racial discrimination accorindg to user input
+#' Output: @return extended_data ... data list with variables for racial discrimination accorindg to user input
 #' Input: @param data_cleaned .... cleaned data as obtained from general_data_preperation function
 #' 
 define_variables <-
@@ -373,7 +381,11 @@ define_variables <-
     extended_data_R <-
       mutate(extended_data_R, syBP_mean = mean(c_across(starts_with("syBPM"))))
     extended_data_R <-
+      mutate(extended_data_R, pw_syBP_mean = mean(c_across(starts_with("pw_SyBPM"))))
+    extended_data_R <-
       mutate(extended_data_R, BMI = wLbs / (hInc ^ 2) * 703) #703 is correction factor for inches and pounds
+    extended_data_R <- 
+      mutate(extended_data_R, BMI_pw = wLbs_pw / (hInc_pw ^2) * 703) #703 is correction factor for inches and pounds
     
     #Construct control variables of interest
     
@@ -382,8 +394,8 @@ define_variables <-
       mutate(extended_data_R, nSmokenow = ifelse(smokenow == 0, 0, nSmokenow))
     extended_data_R <-
       mutate(extended_data_R, nSmokemos = ifelse(everSmoke == 0, 0, nSmokemos))
-    
-    #everDRink and drink most !@!@!)@*!)@*
+    extended_data_R <-
+      mutate(extended_data_R, nSmokepw = ifelse(everSmoke == 0, 0, nSmokepw))
     
     #simplification of retirement status, workingNow dummy if someone is working or not
     extended_data_R <-
@@ -493,10 +505,6 @@ define_variables <-
       mutate(extended_data, wealth_bin = ntile(wealthCalc, 10)) #make 10 wealth bins -- still need to make ordered factor from this
     extended_data$wealth_bin <-
       factor(extended_data$wealth_bin, order = TRUE)
-    
-    #Change bcak to non-row-wise
-    extended_data <- ungroup(extended_Data_R)
-    
     
     return(extended_data)
   }
