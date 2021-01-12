@@ -2,7 +2,7 @@
 #Reads in data from stata file
 #Output: @output_data <- R data file
 #Input: @filename - location of file in working directory
-data_loader <- function(filename = "Data/merged_data.dta"){
+data_loader <- function(filename = "0_Data_loading/merged_data.dta"){
   
 #Load packages recuired in this function
 library(haven)
