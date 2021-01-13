@@ -41,13 +41,6 @@ data_seperator <- function(raw_data = unseperated_data, control_columns = NA, mo
   #Return list 
   data_list <- list("controls" = control_variables, "moderators" = moderator_variables, "treatment" = treatment, "outcomes" = outcomes)
   return(data_list)
-  #Seperate treatment, outcomes and control variables - do not seperate moderating variables out yet
-  
-  #Make sure certain variables are factors (level variables)
-  
-  #Make sure that the multiple choice variables (q29 and q30 become one variable)
-  
-  #Make sure it in the right data format(dataframe?)
 }
 
 #' variable_rename
@@ -160,6 +153,11 @@ data_formatter <- function(non_formatted_data = NA) {
           }
         }
       }
+      
+      
+      #Put it in the formatted_data
+      formatted_data[[i]] <- variable
+      
     }
     
     for (i in c("hInc", "hInc_pw", "waist", "waist_pw")){ #Out of Range measurements (denoted by 99-190) are currently denoted by NA
@@ -173,6 +171,10 @@ data_formatter <- function(non_formatted_data = NA) {
           }
         }
       }
+      
+      #Put it in the formatted_data
+      formatted_data[[i]] <- variable
+      
     }
     #Control variables
     
@@ -389,6 +391,14 @@ define_variables <-
     extended_data_R <- 
       mutate(extended_data_R, BMI_pw = wLbs_pw / (hInc_pw ^2) * 703) #703 is correction factor for inches and pounds
     
+    #Construct delta outcomes
+    extended_data_R <- 
+      mutate(extended_data_R, d_syBP_mean = syBP_mean - pw_syBP_mean)
+    extended_data_R <- 
+      mutate(extended_data_R, d_BMI = BMI - BMI_pw)
+    extended_data_R <- 
+      mutate(extended_data_R, d_waist = waist - waist_pw)
+    
     #Construct control variables of interest
     
     #number of glasses per drinking day in last 3 months is 0 when someone drinks 0 days in last 3 months
@@ -399,9 +409,9 @@ define_variables <-
     
     #Create interaction variable: glasses alchol drank per week last 3 months
     extended_data_R <-
-      mutate(extended_data_R, nDrinkPerWeek = ifelse(!is.na(nGDrink) & !is.na(nDDrink)), nGDrink * nDDrink, NA)
+      mutate(extended_data_R, nDrinkPerWeek = ifelse(!is.na(nGDrink) & !is.na(nDDrink), nGDrink * nDDrink, NA))
     extended_data_R <-
-      mutate(extended_data_R, nDrinkPwerWeek_pw = ifelse(!is.na(nGDrink_pw) & !is.na(nDDrink_pw), nGDrink_pw * nDDrink_pw), NA)
+      mutate(extended_data_R, nDrinkPerWeek_pw = ifelse(!is.na(nGDrink_pw) & !is.na(nDDrink_pw), nGDrink_pw * nDDrink_pw, NA))
     
     #number of cigarettes is 0 when someone says he/she is not a smoker (instead of NA)
     extended_data_R <-
