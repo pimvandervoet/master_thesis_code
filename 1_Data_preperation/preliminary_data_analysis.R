@@ -84,15 +84,12 @@ summary_statistics <-
 
     #Cycle through all sets and obtain summary statistics
     for (i in 1:length(listofsumstats)) {
+      #Now only means and #'s for factors. Might want to include Standard Erros at one point
       sumstats[[names(listofsumstats)[i]]] <- summary(listofsumstats[[i]])
     }
     
     
-    #produce the summary statistics by cycling through the list
-    
-    #We want to calc means for doubles
-    #We want to do counts for levels of factors
-    #We want to compute standard deviations for others?
+
     
     return(sumstats)
 }
@@ -101,13 +98,91 @@ summary_statistics <-
 #'
 #' @description This function provides basic summary statistics used in the report.
 #'
-#' @return treatment_analysis ... list with treament_analysis: boxplots for no treatment and treatment
+#' @return plotlist ... list with treament_analysis: boxplots for no treatment and treatment
 #'
 #' @param data_seperated ... list of input data
 #' @param varsOfInterest ...  variables of interest to consider in the treatment (propensity score) analysis
 #'
 treatment_analysis <-
   function(input_data = data_seperated,
-           varsOfInterest = c("race", "sex", "age", "wealthCalc", "sex")) {
+           varsOfInterest = c("race", "sex", "age", "wealth_bin", "sex")) {
+    library(ggplot2)
+    moderator <- input_data[[2]]
+    treatment <- input_data[[3]]
+    outcomes <- input_data[[4]]
+    plot_data <- cbind(moderator, treatment, outcomes)
+    plot_data$expRDAll <- as_factor(plot_data$expRDAll)
+    plot_data$sex <- as_factor(plot_data$sex)
+    plot_data$wealth_bin <- as_factor(plot_data$wealth_bin)
+    
+    #Make a list to save all plots in
+    plotlist <- list()
+    
+    #Make all plots in the loop  - beautify & clarify later
+    varsOfInterest_box <-
+      varsOfInterest[!varsOfInterest %in% c("age")]
+    
+    for (voi in varsOfInterest_box) {
+      for (ooi in names(outcomes)) {
+        plotlist[[paste("boxplot ", voi, ooi)]] <-
+          ggplot(plot_data, aes_string(x = ooi, y = voi,  fill = "expRDAll")) +
+          geom_boxplot() +
+          labs(
+            title = paste(
+              ooi,
+              "per",
+              voi,
+              "for Individuals that Experience Racial Discrimination and Individuals that do not"
+            ),
+            x = ooi,
+            y = voi,
+            fill = "Experienced Racial Discrimination (1 = yes)"
+          )
+      }
+    }
+    
+    varsOfInterest_cart <- c("age")
+    
+    for (voi in varsOfInterest_cart) {
+      for (ooi in names(outcomes)) {
+        plotlist[[paste("carthesian ", voi, ooi)]] <-
+          ggplot(plot_data, aes_string(x = ooi, y = voi)) +
+          geom_point(aes(col = expRDAll)) +
+          labs(
+            title = paste(
+              ooi,
+              "per",
+              voi,
+              "for Individuals that Experience Racial Discrimination and Individuals that do not"
+            ),
+            x = ooi,
+            y = voi,
+            fill = "Experienced Racial Discrimination (1 = yes)"
+          )
+      }
+    }
+    
+    return(plotlist)
     
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

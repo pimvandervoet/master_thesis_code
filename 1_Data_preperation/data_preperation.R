@@ -148,7 +148,7 @@ data_formatter <- function(non_formatted_data = NA) {
       
       for (observation in 1:dim(formatted_data)[1]) {
         if(!is.na(variable[observation])){
-          if(variable[observation] > 500){
+          if(variable[observation] > 500 | variable[observation] < 30){
             variable[observation] <- NA
           }
         }

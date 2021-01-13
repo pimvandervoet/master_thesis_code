@@ -83,6 +83,10 @@ data_seperated_2 <- data_seperator(analysis_dataset, controlvariables_2, moderat
 
 #Basic insights####
 
+source("1_Data_preperation/preliminary_data_analysis.R")
+sumstats_1 <- summary_statistics(data_seperated_1, main_split = "treatment", further_splits = "race")
+sumstats_2 <- summary_statistics(data_seperated_2, main_split = "treatment", further_splits = "race")
+
 #Provide initial insights on the data (missings, distributions etc.) 
 
 #Prepare the data by treating missings, constructing subsets, creating new variables
