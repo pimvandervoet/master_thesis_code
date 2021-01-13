@@ -1,5 +1,5 @@
 *A) Download data files
-* Fat file 2016 & 2014 and Longitudinal file from https://hrsdata.isr.umich.edu/data-products/rand
+* Fat file 2016 & 2012 and Longitudinal file from https://hrsdata.isr.umich.edu/data-products/rand
 
 *B) Load Fat file 2016, select variables, remove missing observations on key outcomes of interest
 set maxvar 100000
@@ -12,14 +12,14 @@ drop if missing(pi859) | missing(pi864) | missing(pi869)| missing(pi834)| missin
 
 save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2016
 
-*C) Load Fat file 2014, select variables
+*C) Load Fat file 2012, select variables
 
-use "C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\h14f2a.dta"
-keep oi859 oi864 oi869 oi907 oi834 oi841 oc118 oc129 hhidpn
+use "C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\h12f2a.dta"
+keep ni859 ni864 ni869 ni907 ni834 ni841 nc118 nc129 hhidpn
 
-save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2014
+save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2012
 
-*D) Merge selection from 2014 into the 2016 Fat file (keep if full match or only in 2016 file)
+*D) Merge selection from 2012 into the 2016 Fat file (keep if full match or only in 2016 file)
 
 merge 1:1 hhidpn using  "C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2016"
 keep if _merge == 3 | _merge == 2

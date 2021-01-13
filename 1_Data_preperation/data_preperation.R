@@ -70,19 +70,21 @@ variable_rename <- function(non_named_data = NA){
       wLbs = pi841,
       hInc = pi834,
       waist = pi907,
-      pw_syBPM1 = oi859, #Outcome variables 2014
-      pw_syBPM2 = oi864,
-      pw_syBPM3 = oi869,
-      wLbs_pw = oi841,
-      hInc_pw = oi834,
-      waist_pw = oi907,
+      pw_syBPM1 = ni859, #Outcome variables 2014
+      pw_syBPM2 = ni864,
+      pw_syBPM3 = ni869,
+      wLbs_pw = ni841,
+      hInc_pw = ni834,
+      waist_pw = ni907,
       everSmoke = pc116, #Control and moderator variables
       smokenow = pc117,
       nSmokenow = pc118,
-      nSmokepw = oc118,
+      nSmokepw = nc118,
       nSmokemos = pc123,
-      nDrink = pc129,
-      nDrink_pw = oc129,
+      nDDrink = pc129,
+      nDDrink_pw = nc129,
+      nGDrink = pc130,
+      nGDrink_pw = oc130,
       jobStat.A1 = pj005m1,
       jobStat.A2 = pj005m2,
       jobStat.A3 = pj005m3,
@@ -91,11 +93,11 @@ variable_rename <- function(non_named_data = NA){
       vigAct = pc223,
       modAct = pc224,
       milAct = pc225,
-      mStat12 = r12mstat,
+      mStat11 = r11mstat,
       mStat13 = r13mstat,
-      smoker12 = r12smoken,
+      smoker11 = r11smoken,
       smoker13 = r13smoken,
-      drinker12 = s12drink,
+      drinker11 = s11drink,
       drinker13 = s13drink,
       prevRetStat = pz134,
       race = raracem,
@@ -217,7 +219,7 @@ data_formatter <- function(non_formatted_data = NA) {
     
     
     #Numerical/Double variables
-    for (i in c("nSmokenow", "nSmokepw", "nSmokemos", "nDrink", "nDrink_pw")) {
+    for (i in c("nSmokenow", "nSmokepw", "nSmokemos", "nDDrink", "nDDrink_pw")) {
       #Select the variable that needs to be changed
       variable <- formatted_data[[i]]
       
@@ -236,7 +238,7 @@ data_formatter <- function(non_formatted_data = NA) {
     
     #Factors - simple
     for (i in c(
-      "mStat12",
+      "mStat11",
       "mStat13",
       "race",
       "jobStat.A1",
@@ -389,6 +391,18 @@ define_variables <-
     
     #Construct control variables of interest
     
+    #number of glasses per drinking day in last 3 months is 0 when someone drinks 0 days in last 3 months
+    extended_data_R <-
+      mutate(extended_data_R, nGDrink = ifelse(nDDrink == 0 , 0, nGDrink))
+    extended_data_R <-
+      mutate(extended_data_R, nGDrink_pw = ifelse(nDDrink_pw == 0 , 0, nGDrink_pw))
+    
+    #Create interaction variable: glasses alchol drank per week last 3 months
+    extended_data_R <-
+      mutate(extended_data_R, nDrinkPerWeek = ifelse(!is.na(nGDrink) & !is.na(nDDrink)), nGDrink * nDDrink, NA)
+    extended_data_R <-
+      mutate(extended_data_R, nDrinkPwerWeek_pw = ifelse(!is.na(nGDrink_pw) & !is.na(nDDrink_pw), nGDrink_pw * nDDrink_pw), NA)
+    
     #number of cigarettes is 0 when someone says he/she is not a smoker (instead of NA)
     extended_data_R <-
       mutate(extended_data_R, nSmokenow = ifelse(smokenow == 0, 0, nSmokenow))
@@ -424,24 +438,24 @@ define_variables <-
     
     #Major life events
     extended_data_R <-
-      mutate(extended_data_R, quit_smoking = ifelse((smoker12 == 1 &
+      mutate(extended_data_R, quit_smoking = ifelse((smoker11 == 1 &
                                                        smoker13 == 0), 1, 0))
     extended_data_R <-
       mutate(extended_data_R, started_smoking = ifelse((smoker13 == 1 &
-                                                          smoker12 == 0), 1, 0))
+                                                          smoker11 == 0), 1, 0))
     
     extended_data_R <-
-      mutate(extended_data_R, quit_drinking = ifelse((drinker12 == 1 &
+      mutate(extended_data_R, quit_drinking = ifelse((drinker11 == 1 &
                                                         drinker13 == 0), 1, 0))
     extended_data_R <-
       mutate(extended_data_R, started_drinking = ifelse((drinker13 == 1 &
-                                                           drinker12 == 0), 1, 0))
+                                                           drinker11 == 0), 1, 0))
     
     extended_data_R <-
       mutate(extended_data_R, divorced_or_seperated = ifelse(
         (
-          mStat12 == "1.married" |
-            mStat12 == "2.married, spouse absent" | mStat12 == "3.partnered"
+          mStat11 == "1.married" |
+            mStat11 == "2.married, spouse absent" | mStat11 == "3.partnered"
         )
         &
           (
@@ -454,8 +468,8 @@ define_variables <-
     extended_data_R <-
       mutate(extended_data_R, widowed = ifelse(
         (
-          mStat12 == "1.married" |
-            mStat12 == "2.married, spouse absent" | mStat12 == "3.partnered"
+          mStat11 == "1.married" |
+            mStat11 == "2.married, spouse absent" | mStat11 == "3.partnered"
         )
         &
           mStat13 == "7.widowed",
@@ -470,10 +484,10 @@ define_variables <-
         )
         &
           (
-            mStat12 == "4.seperated" |
-              mStat12 == "5.divorced" |
-              mStat12 == "6.seperated/divorced" |
-              mStat12 == "7.widowed" | mStat12 == "8.never married"
+            mStat11 == "4.seperated" |
+              mStat11 == "5.divorced" |
+              mStat11 == "6.seperated/divorced" |
+              mStat11 == "7.widowed" | mStat11 == "8.never married"
           ),
         1,
         0
