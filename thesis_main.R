@@ -84,8 +84,12 @@ data_seperated_2 <- data_seperator(analysis_dataset, controlvariables_2, moderat
 #Basic insights####
 
 source("1_Data_preperation/preliminary_data_analysis.R")
+#Gather summary statistics
 sumstats_1 <- summary_statistics(data_seperated_1, main_split = "treatment", further_splits = "race")
 sumstats_2 <- summary_statistics(data_seperated_2, main_split = "treatment", further_splits = "race")
+
+#Create some plots to give insight in how the health outcomes are divided over moderator variables and experiences of racial discrimintion
+treatment_plots <- treatment_analysis(data_seperated_1)
 
 #Provide initial insights on the data (missings, distributions etc.) 
 
