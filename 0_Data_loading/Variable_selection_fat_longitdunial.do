@@ -29,7 +29,7 @@ save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_
 *E) Load longitudinal files and select variables
 
 use "C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\randhrs1992_2016v2.dta"
-keep raracem raeduc rameduc r11mstat r13mstat r11smoken r13smoken s11drink s13drink hhidpn 
+keep raracem raeduc rameduc r11mstat r13mstat r11smoken r13smoken s11drink s13drink hhidpn r13wtrespe 
 
 save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_longitudinal_file 
 

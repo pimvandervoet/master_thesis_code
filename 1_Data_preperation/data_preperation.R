@@ -57,6 +57,7 @@ variable_rename <- function(non_named_data = NA){
   
     renamed_data <- non_named_data %>%
     rename(
+      sampleWeight = r13wtrespe,
       syBPM1 = pi859, #Outcome variables
       syBPM2 = pi864,
       syBPM3 = pi869,
@@ -168,6 +169,10 @@ data_formatter <- function(non_formatted_data = NA) {
         if(!is.na(variable[observation])){
           if(variable[observation] > 95){
             variable[observation] <- NA
+          }else if((i == "hInc" | i == "hInc_pw") & variable[observation] < 40){
+            variable[observation] <- NA  
+          }else if ((i == "waist" | i == "waist_pw") & variable[observation] <15){
+            variable[observation] <- NA
           }
         }
       }
@@ -177,6 +182,25 @@ data_formatter <- function(non_formatted_data = NA) {
       
     }
     #Control variables
+    
+    #Set ages below 50 to NA
+    for (i in c("age")) {
+      #Select the variable that needs to be changed
+      variable <- formatted_data[[i]]
+      
+      for (observation in 1:dim(formatted_data)[1]) {
+        if (!is.na(variable[observation])) {
+          if (variable[observation] < 50) {
+            variable[observation] <- NA
+            
+          } 
+          
+        }
+      }
+      
+      #Put it in the formatted_data
+      formatted_data[[i]] <- variable
+    }
     
     #Binary variables - Change answers to dummy by setting NO = 0, YES = 1, DK, NA AND RF  = NA
     for (i in c("everSmoke", "smokenow", "married")) {
@@ -221,18 +245,18 @@ data_formatter <- function(non_formatted_data = NA) {
     
     
     #Numerical/Double variables
-    for (i in c("nSmokenow", "nSmokepw", "nSmokemos", "nDDrink", "nDDrink_pw")) {
+    for (i in c("nSmokenow", "nSmokepw", "nSmokemos", "nDDrink", "nDDrink_pw", "nGDrink", "nGDrink_pw")) {
       #Select the variable that needs to be changed
       variable <- formatted_data[[i]]
       
       for (observation in 1:dim(formatted_data)[1]) {
         if (!is.na(variable[observation])) {
-          if (variable[observation] == 98 |
-              variable[observation] == 99) {
+          if (variable[observation] > 90) {
+            variable[observation] <- NA
+          } else if ((i == "nDDrink" | i == "nDDrink_pw") & variable[observation] > 7){
             variable[observation] <- NA
           }
-          
-        }
+         }
       }
       #Put it in the formatted_data
       formatted_data[[i]] <- variable
