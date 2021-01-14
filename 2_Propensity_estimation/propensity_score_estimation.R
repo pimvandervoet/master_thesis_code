@@ -64,7 +64,8 @@ ps_estimator <-
         test_indicator <- which(folds == k_fold, arr.ind=TRUE)
         train_predictors <- shuffled_predictors[-test_indicator, ]
         test_predictors <- shuffled_predictors[test_indicator, ]
-        train_treatment <- shuffled_treatment[-test_indicator]
+        train_treatment <- shuffled_treatment[-test_indicator, ]
+        train_treatment <- pull(train_treatment, expRDAll)
         
         #Make sure train and test predictors are dataframe (unlist function)
         

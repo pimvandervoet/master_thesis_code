@@ -95,7 +95,7 @@ summary_statistics <-
 }
 
 #' preliminary_treatment_analysis
-#'
+# '
 #' @description This function provides basic summary statistics used in the report.
 #'
 #' @return plotlist ... list with treament_analysis: boxplots for no treatment and treatment

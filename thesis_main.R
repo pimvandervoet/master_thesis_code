@@ -36,6 +36,7 @@ remove(racism_added)
 #Create seperations of data and select which variables are used as control/moderator variables: Model 1 used to explain levels, Model 2 to explain changes between 2012 and 2016
 controlvariables_1 <-
   c(
+    "sampleWeight",
     "sex",
     "race",
     "wealth_bin",
@@ -91,8 +92,19 @@ sumstats_2 <- summary_statistics(data_seperated_2, main_split = "treatment", fur
 #Create some plots to give insight in how the health outcomes are divided over moderator variables and experiences of racial discrimintion
 treatment_plots <- treatment_analysis(data_seperated_1)
 
+#Do simple resample to make sure that 'representative summary statistics can be obtained
+source("1_Data_preperation/resampling.R")
+repsample_sumstats <- simple_resampler(analysis_dataset)
+repsample_households <- nrow(repsample_sumstats)
+seperated_repsample <- data_seperator(repsample_sumstats, controlvariables_2, moderatorvariables_2, treatmentvariables_2, outcomevariables_2)
+sumstats_repsample <- summary_statistics(seperated_repsample)
+
+
 #Provide initial insights on the data (missings, distributions etc.) 
 
+#FOR NOW - oversimplified KNN imputation of data to test model. 
+source("1_Data_preperation/simple_knn/imputation.R")
+testdataset <- simple_knn(data_seperated_1)
 #Prepare the data by treating missings, constructing subsets, creating new variables
 
 #Provide insights again, but now with the "cleaned data" 
