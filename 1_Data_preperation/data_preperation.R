@@ -181,6 +181,7 @@ data_formatter <- function(non_formatted_data = NA) {
       formatted_data[[i]] <- variable
       
     }
+    
     #Control variables
     
     #Set ages below 50 to NA
@@ -407,9 +408,9 @@ define_variables <-
     
     #Construct outcome variables of interest
     extended_data_R <-
-      mutate(extended_data_R, syBP_mean = mean(c_across(starts_with("syBPM"))))
+      mutate(extended_data_R, syBP_mean = mean(c_across(starts_with("syBPM")), na.rm=TRUE))
     extended_data_R <-
-      mutate(extended_data_R, pw_syBP_mean = mean(c_across(starts_with("pw_SyBPM"))))
+      mutate(extended_data_R, pw_syBP_mean = mean(c_across(starts_with("pw_SyBPM")), na.rm=TRUE))
     extended_data_R <-
       mutate(extended_data_R, BMI = wLbs / (hInc ^ 2) * 703) #703 is correction factor for inches and pounds
     extended_data_R <- 
@@ -740,6 +741,43 @@ define_racial_discrimination <-
     }
   }
 
+
+
+#' remove_NA_outcomes
+#' 
+#' @description Removes observations with NA outcomes from sepearted data
+#' 
+#' Output: @return seperated_dataset_no_NA_outcome
+#' Input: @param data seperated_dataset
+remove_NA_outcomes <- function(dat = seperated_dataset){
+  
+  completerows <- complete.cases(dat$outcomes)
+  seperated_datset_no_NA_outcome <- dat
+  seperated_datset_no_NA_outcome$outcomes <- dat$outcomes[completerows,]
+  seperated_datset_no_NA_outcome$controls <- dat$controls[completerows,]
+  seperated_datset_no_NA_outcome$moderators <- dat$moderators[completerows,]
+  seperated_datset_no_NA_outcome$treatment <- dat$treatment[completerows,]
+  
+  return(seperated_datset_no_NA_outcome)
+}
+
+#' remove_obs_missing_mods
+#' 
+#' @description Removes observations with NA values in missing data from seperated data
+#' 
+#' Output: @return seperated_dataset_no_missing_mod
+#' Input: @param data seperated_dataset
+remove_obs_missing_mods <- function(dat = seperated_dataset){
+  
+  completerows <- complete.cases(dat$moderators)
+  seperated_dataset_no_missing_mod <- dat
+  seperated_dataset_no_missing_mod$outcomes <- dat$outcomes[completerows,]
+  seperated_dataset_no_missing_mod$controls <- dat$controls[completerows,]
+  seperated_dataset_no_missing_mod$moderators <- dat$moderators[completerows,]
+  seperated_dataset_no_missing_mod$treatment <- dat$treatment[completerows,]
+  
+  return(seperated_dataset_no_missing_mod)
+}
 
 #' racial_discrimination_analysis
 #' 

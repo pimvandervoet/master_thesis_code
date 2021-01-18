@@ -74,23 +74,30 @@ treatmentvariables_1 <- c("expRDAll")
 
 controlvariables_2 <- c(controlvariables_1, "quit_smoking", "started_smoking", "quit_drinking", "started_drinking", "divorced_or_seperated", "widowed", "recently_married_or_partnered", "quit_working")
 moderatorvariables_2 <- moderatorvariables_1
-outcomevariables_2 <- outcomevariables_1
+outcomevariables_2 <- c("d_syBP_mean", "d_BMI", "d_waist")
 treatmentvariables_2 <- treatmentvariables_1
 
+#Make data sets and remove observations with NA in outcomes or moderators to prevent severe bias
 data_seperated_1 <- data_seperator(analysis_dataset, controlvariables_1, moderatorvariables_1, treatmentvariables_1, outcomevariables_1)
+data_seperated_1 <- remove_NA_outcomes(data_seperated_1)
+data_seperated_1 <- remove_obs_missing_mods(data_seperated_1)
 data_seperated_2 <- data_seperator(analysis_dataset, controlvariables_2, moderatorvariables_2, treatmentvariables_2, outcomevariables_2)
-
-
+data_seperated_2 <- remove_NA_outcomes(data_seperated_2)
+data_seperated_2 <- remove_obs_missing_mods(data_seperated_2)
 
 #Basic insights####
 
 source("1_Data_preperation/preliminary_data_analysis.R")
+
 #Gather summary statistics
 sumstats_1 <- summary_statistics(data_seperated_1, main_split = "treatment", further_splits = "race")
 sumstats_2 <- summary_statistics(data_seperated_2, main_split = "treatment", further_splits = "race")
 
 #Create some plots to give insight in how the health outcomes are divided over moderator variables and experiences of racial discrimintion
 treatment_plots <- treatment_analysis(data_seperated_1)
+
+#Deal with missing data in control variables by considering whether high correlation with treatment - high correlation implicates that there may be bias induced by removing variable
+
 
 #Do simple resample to make sure that 'representative summary statistics can be obtained
 source("1_Data_preperation/resampling.R")
