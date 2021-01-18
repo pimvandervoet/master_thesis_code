@@ -16,16 +16,19 @@
 BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, errordistribution = "normal", sensitivity_parameters = "null", ps_estimate_inclusion = "both"){
   library(bcf)
   library(dbarts)
-  #First transform control and moderator variables to matrix from dataframe, drops columsn that are constant or factors levels without instances
-  cvars_matrix <- makeModelMatrixFromDataFrame(cvars, drop = TRUE) 
-  mvars_matrix <- makeModelMatrixFromDataFrame(mvars, drop = TRUE)
   
+  results_for_posterior_inference <- list()
+  
+  #Select outcome
+  for(selected in names(outcome)){
+    
+  outcome_select <- outcome[, selected]
   #Obtain model estimates using the bcf function of Hahn, Carvlho, Murray 2020
   bcf_estimates <- bcf(
-    y = outcome,
+    y = outcome_select,
     z = treatment,
-    x_control = cvars_matrix,
-    x_moderate = mvars_matrix,
+    x_control = cvars,
+    x_moderate = mvars,
     pihat = ps_estimates,
     nburn = 2000L,
     nsim = 4000L,
@@ -33,11 +36,11 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     update_interval = 200L,
     #Prior specification and nr of trees etc. according to specification of Hahn, Murray, Carvalho 2020
     ntree_control = 200L,
-    sd_control = 2 * sd(outcome),
+    sd_control = 2 * sd(outcome_select),
     base_control = 0.95,
     power_control = 2,
     ntree_moderate = 50,
-    sd_moderate = sd(outcome),
+    sd_moderate = sd(outcome_select),
     base_moderate = 0.25,
     power_moderate = 3,
     nu = 3,
@@ -49,8 +52,12 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     use_tauscale = TRUE
   )
   
+  
   #Return both posterior results and features of all individuals to do posterior inference
-  results_for_posterior_inference <- list("posterior_draws" = bcf_estimates, "effect_moderators" = mvars)
+  results_for_posterior_inference <- list(results_for_posterior_inference, paste("posterior_results", selected) = bcf_estimates)
+  
+  }
+  results_for_posterior_inference <- list(results_for_posterior_inference, "effect_moderators" = mvars)
   return(results_for_posterior_inference)
   
   }
