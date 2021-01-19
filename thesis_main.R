@@ -77,13 +77,32 @@ moderatorvariables_2 <- moderatorvariables_1
 outcomevariables_2 <- c("d_syBP_mean", "d_BMI", "d_waist")
 treatmentvariables_2 <- treatmentvariables_1
 
+
 #Make data sets and remove observations with NA in outcomes or moderators to prevent severe bias
+source("1_Data_preperation/simple_knn_imputation.R")
+#Basic analysis
 data_seperated_1 <- data_seperator(analysis_dataset, controlvariables_1, moderatorvariables_1, treatmentvariables_1, outcomevariables_1)
 data_seperated_1 <- remove_NA_outcomes(data_seperated_1)
 data_seperated_1 <- remove_obs_missing_mods(data_seperated_1)
+data_seperated_1 <- remove_big_missing_control(data_seperated_1)
+data_seperated_1 <- remove_noninformative_missing_control(data_seperated_1)
+data_seperated_1 <- remove_unknown_activity(data_seperated_1)
+data_seperated_1 <- impute_from_other_wave(data_seperated_1)
+data_seperated_1 <- remove_unknown_smoke_drink_13(data_seperated_1)
+data_seperated_1 <- knn_impute_moEducation(data_seperated_1)
+data_seperated_1 <- mode_impute_education(data_seperated_1)
+
+#Difference between waves analysis
 data_seperated_2 <- data_seperator(analysis_dataset, controlvariables_2, moderatorvariables_2, treatmentvariables_2, outcomevariables_2)
 data_seperated_2 <- remove_NA_outcomes(data_seperated_2)
 data_seperated_2 <- remove_obs_missing_mods(data_seperated_2)
+data_seperated_2 <- remove_big_missing_control(data_seperated_2)
+data_seperated_2 <- remove_noninformative_missing_control(data_seperated_2)
+data_seperated_2 <- remove_unknown_activity(data_seperated_2)
+data_seperated_2 <- impute_from_other_wave(data_seperated_2)
+data_seperated_2 <- remove_unknown_smoke_drink_13(data_seperated_2)
+data_seperated_2 <- knn_impute_moEducation(data_seperated_2)
+data_seperated_2 <- mode_impute_education(data_seperated_2)
 
 #Basic insights####
 
@@ -110,9 +129,10 @@ source("1_Data_preperation/resampling.R")
 #Provide initial insights on the data (missings, distributions etc.) 
 
 #FOR NOW - oversimplified KNN imputation of data to test model. - this knn makes some factors malformed...
-source("1_Data_preperation/simple_knn_imputation.R")
-testdataset <- simple_knn(data_seperated_1)
-testdataset$moderators <- testdataset$controls[, moderatorvariables_1]
+#source("1_Data_preperation/simple_knn_imputation.R")
+#testdataset <- simple_knn(data_seperated_1)
+#testdataset$moderators <- testdataset$controls[, moderatorvariables_1]
+testdataset$
 
 #Prepare the data by treating missings, constructing subsets, creating new variables
 
