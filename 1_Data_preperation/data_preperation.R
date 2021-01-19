@@ -75,10 +75,10 @@ variable_rename <- function(non_named_data = NA){
       nSmokenow = pc118,
       nSmokepw = nc118,
       nSmokemos = pc123,
-      nDDrink = pc129,
-      nDDrink_pw = nc129,
-      nGDrink = pc130,
-      nGDrink_pw = nc130,
+      nDDrink = r13drinkd,
+      nDDrink_pw = r11drinkd,
+      nGDrink = r13drinkn,
+      nGDrink_pw = r11drinkn,
       jobStat.A1 = pj005m1,
       jobStat.A2 = pj005m2,
       jobStat.A3 = pj005m3,
@@ -91,8 +91,8 @@ variable_rename <- function(non_named_data = NA){
       mStat13 = r13mstat,
       smoker11 = r11smoken,
       smoker13 = r13smoken,
-      drinker11 = s11drink,
-      drinker13 = s13drink,
+      drinker11 = r11drink,
+      drinker13 = r13drink,
       prevRetStat = pz134,
       race = raracem,
       sex = px060_r,
@@ -181,6 +181,7 @@ data_formatter <- function(non_formatted_data = NA) {
       formatted_data[[i]] <- variable
       
     }
+    
     #Control variables
     
     #Set ages below 50 to NA
@@ -319,6 +320,16 @@ data_formatter <- function(non_formatted_data = NA) {
       variable <- formatted_data[[i]]
       variable <- as_factor(variable)
       
+      #Set Don't knows and refusals to NA
+      for (observation in 1:dim(formatted_data)[1]) {
+        if (!is.na(variable[observation])) {
+          if (variable[observation] == "8" |
+              variable[observation] == "9") {
+            variable[observation] <- NA
+          }
+        }
+      }
+      
       #Change factor levels - low factor = high activity
       variable <- recode_factor(
         variable,
@@ -327,20 +338,11 @@ data_formatter <- function(non_formatted_data = NA) {
         "2" = "2.once a week",
         "3" = "3.one to three times a month",
         "4" = "4.hardly ever or never",
-        "8" = "8.DK",
-        "9" = "9.RF",
-        .ordered = TRUE
+        .ordered = TRUE,
+        .default = NA_character_
       )
       
-      #Set Don't knows and refusals to NA
-      for (observation in 1:dim(formatted_data)[1]) {
-        if (!is.na(variable[observation])) {
-          if (variable[observation] == "98.DK" |
-              variable[observation] == "99.RF") {
-            variable[observation] <- NA
-          }
-        }
-      }
+ 
       #Put formatted variable in formatted data
       formatted_data[[i]] <- variable
     }
@@ -407,9 +409,9 @@ define_variables <-
     
     #Construct outcome variables of interest
     extended_data_R <-
-      mutate(extended_data_R, syBP_mean = mean(c_across(starts_with("syBPM"))))
+      mutate(extended_data_R, syBP_mean = mean(c_across(starts_with("syBPM")), na.rm=TRUE))
     extended_data_R <-
-      mutate(extended_data_R, pw_syBP_mean = mean(c_across(starts_with("pw_SyBPM"))))
+      mutate(extended_data_R, pw_syBP_mean = mean(c_across(starts_with("pw_SyBPM")), na.rm=TRUE))
     extended_data_R <-
       mutate(extended_data_R, BMI = wLbs / (hInc ^ 2) * 703) #703 is correction factor for inches and pounds
     extended_data_R <- 
@@ -739,6 +741,181 @@ define_racial_discrimination <-
       
     }
   }
+
+
+
+#' remove_NA_outcomes
+#' 
+#' @description Removes observations with NA outcomes from sepearted data
+#' 
+#' Output: @return seperated_dataset_no_NA_outcome
+#' Input: @param data seperated_dataset
+remove_NA_outcomes <- function(dat = seperated_dataset){
+  
+  completerows <- complete.cases(dat$outcomes)
+  seperated_datset_no_NA_outcome <- dat
+  seperated_datset_no_NA_outcome$outcomes <- dat$outcomes[completerows,]
+  seperated_datset_no_NA_outcome$controls <- dat$controls[completerows,]
+  seperated_datset_no_NA_outcome$moderators <- dat$moderators[completerows,]
+  seperated_datset_no_NA_outcome$treatment <- dat$treatment[completerows,]
+  
+  return(seperated_datset_no_NA_outcome)
+}
+
+#' remove_obs_missing_mods
+#' 
+#' @description Removes observations with NA values in missing data from seperated data
+#' 
+#' Output: @return seperated_dataset_no_missing_mod
+#' Input: @param seperated_dataset
+remove_obs_missing_mods <- function(dat = seperated_dataset){
+  
+  completerows <- complete.cases(dat$moderators)
+  seperated_dataset_no_missing_mod <- dat
+  seperated_dataset_no_missing_mod$outcomes <- dat$outcomes[completerows,]
+  seperated_dataset_no_missing_mod$controls <- dat$controls[completerows,]
+  seperated_dataset_no_missing_mod$moderators <- dat$moderators[completerows,]
+  seperated_dataset_no_missing_mod$treatment <- dat$treatment[completerows,]
+  
+  return(seperated_dataset_no_missing_mod)
+}
+
+#' remove_big_missing_control
+#'
+#' @description  Removes control variables with >50% missings that might be informative
+#'
+#' Output @return seperated_dataset_no_big_miss
+#' Input @param seperated_dataset
+remove_big_missing_control <- function(dat = seperated_dataset){
+  
+  big_missing_vars <- c("nSmokepw", "everSmoke", "nSmokenow", "nSmokemos")
+  seperated_dataset_no_big_miss <- dat
+  seperated_dataset_no_big_miss$controls <- seperated_dataset_no_big_miss$controls[, !names(seperated_dataset_no_big_miss$controls) %in% big_missing_vars]
+
+  return(seperated_dataset_no_big_miss)
+}
+
+#' remove_noninformative_missing_control
+#'
+#' @description  Removes control variables with 40-60% missing values that do not add much "extra" information 
+#'
+#' Output @return seperated_dataset_no_noninformative_miss
+#' Input @param seperated_dataset
+remove_noninformative_missing_control <- function(dat = seperated_dataset){
+  
+  non_informative_missing_vars <- c("married", "smokenow")
+  seperated_dataset_no_noninformative_miss <- dat
+  seperated_dataset_no_noninformative_miss$controls <- seperated_dataset_no_noninformative_miss$controls[, !names(seperated_dataset_no_noninformative_miss$controls) %in% non_informative_missing_vars]
+  
+  return(seperated_dataset_no_noninformative_miss)
+}
+
+#' remove_unknown_activity
+#'
+#' @description  Removes observations with answers DK or RF on activity questions. These answers are not coded as seperate answers to analyze because the number of respondents that answer DK or RF is too low to relaibly include in the model.  
+#'
+#' Output @return seperated_dataset_no_unknown_activity
+#' Input @param seperated_dataset
+remove_unknown_activity <- function(dat = seperated_dataset){
+  
+  completerows <- complete.cases(cbind(dat$controls$vigAct, dat$controls$modAct, dat$controls$milAct))
+  seperated_dataset_no_unknown_activity <- dat
+  seperated_dataset_no_unknown_activity$outcomes <- dat$outcomes[completerows,]
+  seperated_dataset_no_unknown_activity$controls <- dat$controls[completerows,]
+  seperated_dataset_no_unknown_activity$moderators <- dat$moderators[completerows,]
+  seperated_dataset_no_unknown_activity$treatment <- dat$treatment[completerows,]
+  
+  return(seperated_dataset_no_unknown_activity)
+}
+
+#' remove_unknown_smoke_drink_13
+#'
+#' @description  Removes individuals from sample of which we don't know if they are smoker in wave 13  
+#'
+#' Output @return seperated_dataset_no_unknown_smokers
+#' Input @param seperated_dataset
+remove_unknown_smoke_drink_13 <- function(dat = seperated_dataset){
+  
+  completerows <- complete.cases(cbind(dat$controls$smoker13, dat$controls$drinker13))
+  seperated_dataset_no_unknown_smokers <- dat
+  seperated_dataset_no_unknown_smokers$outcomes <- dat$outcomes[completerows,]
+  seperated_dataset_no_unknown_smokers$controls <- dat$controls[completerows,]
+  seperated_dataset_no_unknown_smokers$moderators <- dat$moderators[completerows,]
+  seperated_dataset_no_unknown_smokers$treatment <- dat$treatment[completerows,]
+  
+  return(seperated_dataset_no_unknown_smokers)
+}
+
+
+#' impute_from_next_wave
+#'
+#' @description  Imputes missing data for mStat11, Drinking variables, smoker11 and prevRetSTat from next/previous wave if available. Here we assume that behavior of 2016 serves as good approximation of behavior of 2012. 
+#'
+#' Output @return seperated_dataset_imputed_nextwave
+#' Input @param seperated_dataset
+impute_from_other_wave <- function(dat = seperated_dataset){
+  
+  library(dplyr)
+  
+  seperated_dataset_imputed_otherwave <- dat
+  cvars <- seperated_dataset_imputed_otherwave$controls
+  
+  #Do imputation
+  cvars <-
+    mutate(cvars, mStat11 = coalesce(mStat11, mStat13))
+  
+  cvars <- 
+    mutate(cvars, mStat13 = coalesce(mStat13, mStat11))
+  
+  cvars <-
+    mutate(cvars, smoker11 = coalesce(smoker11, smoker13))
+  
+  cvars <-
+    mutate(cvars, smoker13 = coalesce(smoker13, smoker11))
+  
+  cvars <-
+    mutate(cvars, drinker11 = coalesce(drinker11, drinker13))
+  
+  cvars <-
+    mutate(cvars, drinker13 = coalesce(drinker13, drinker11))
+  
+  cvars$prevRetStat <- ifelse(is.na(cvars$prevRetStat), ifelse(cvars$workingNow == 1, levels(cvars$prevRetStat[3]), levels(cvars$prevRetStat[1])) , cvars$prevRetStat)
+  cvars$prevRetStat <- as_factor(cvars$prevRetStat)
+    
+    #Recode levels, high factor is now retired
+  cvars$prevRetStat <- recode_factor(
+    cvars$prevRetStat,
+      "1" = "1.fully retired",
+      "2" = "3.partially retired",
+      "3" = "5.not retired",
+      .ordered = TRUE
+    )
+ 
+  cvars <-
+    mutate(cvars, nDDrink_pw = coalesce(nDDrink_pw, nDDrink))
+  
+  cvars <-
+    mutate(cvars, nDDrink = coalesce(nDDrink, nDDrink_pw))
+  
+  cvars <-
+    mutate(cvars, nGDrink_pw = coalesce(nGDrink_pw, nGDrink))
+  
+  cvars <-
+    mutate(cvars, nGDrink = coalesce(nGDrink, nGDrink_pw))
+  
+  #Update drinks per week if now possible
+  cvars <-
+    mutate(cvars, nDrinkPerWeek_pw = ifelse(is.na(nDrinkPerWeek_pw), nGDrink_pw * nDDrink_pw, nDrinkPerWeek_pw))
+  
+  cvars <-
+    mutate(cvars, nDrinkPerWeek = ifelse(is.na(nDrinkPerWeek), nGDrink * nDDrink, nDrinkPerWeek))
+  
+  seperated_dataset_imputed_otherwave$controls <-cvars 
+  
+  return(seperated_dataset_imputed_otherwave)
+}
+
+
 
 
 #' racial_discrimination_analysis

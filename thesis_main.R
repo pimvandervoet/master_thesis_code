@@ -74,17 +74,40 @@ treatmentvariables_1 <- c("expRDAll")
 
 controlvariables_2 <- c(controlvariables_1, "quit_smoking", "started_smoking", "quit_drinking", "started_drinking", "divorced_or_seperated", "widowed", "recently_married_or_partnered", "quit_working")
 moderatorvariables_2 <- moderatorvariables_1
-outcomevariables_2 <- outcomevariables_1
+outcomevariables_2 <- c("d_syBP_mean", "d_BMI", "d_waist")
 treatmentvariables_2 <- treatmentvariables_1
 
+
+#Make data sets and remove observations with NA in outcomes or moderators to prevent severe bias
+source("1_Data_preperation/simple_knn_imputation.R")
+#Basic analysis
 data_seperated_1 <- data_seperator(analysis_dataset, controlvariables_1, moderatorvariables_1, treatmentvariables_1, outcomevariables_1)
+data_seperated_1 <- remove_NA_outcomes(data_seperated_1)
+data_seperated_1 <- remove_obs_missing_mods(data_seperated_1)
+data_seperated_1 <- remove_big_missing_control(data_seperated_1)
+data_seperated_1 <- remove_noninformative_missing_control(data_seperated_1)
+data_seperated_1 <- remove_unknown_activity(data_seperated_1)
+data_seperated_1 <- impute_from_other_wave(data_seperated_1)
+data_seperated_1 <- remove_unknown_smoke_drink_13(data_seperated_1)
+data_seperated_1 <- knn_impute_moEducation(data_seperated_1)
+data_seperated_1 <- mode_impute_education(data_seperated_1)
+
+#Difference between waves analysis
 data_seperated_2 <- data_seperator(analysis_dataset, controlvariables_2, moderatorvariables_2, treatmentvariables_2, outcomevariables_2)
-
-
+data_seperated_2 <- remove_NA_outcomes(data_seperated_2)
+data_seperated_2 <- remove_obs_missing_mods(data_seperated_2)
+data_seperated_2 <- remove_big_missing_control(data_seperated_2)
+data_seperated_2 <- remove_noninformative_missing_control(data_seperated_2)
+data_seperated_2 <- remove_unknown_activity(data_seperated_2)
+data_seperated_2 <- impute_from_other_wave(data_seperated_2)
+data_seperated_2 <- remove_unknown_smoke_drink_13(data_seperated_2)
+data_seperated_2 <- knn_impute_moEducation(data_seperated_2)
+data_seperated_2 <- mode_impute_education(data_seperated_2)
 
 #Basic insights####
 
 source("1_Data_preperation/preliminary_data_analysis.R")
+
 #Gather summary statistics
 sumstats_1 <- summary_statistics(data_seperated_1, main_split = "treatment", further_splits = "race")
 sumstats_2 <- summary_statistics(data_seperated_2, main_split = "treatment", further_splits = "race")
@@ -92,28 +115,61 @@ sumstats_2 <- summary_statistics(data_seperated_2, main_split = "treatment", fur
 #Create some plots to give insight in how the health outcomes are divided over moderator variables and experiences of racial discrimintion
 treatment_plots <- treatment_analysis(data_seperated_1)
 
+#Deal with missing data in control variables by considering whether high correlation with treatment - high correlation implicates that there may be bias induced by removing variable
+
+
 #Do simple resample to make sure that 'representative summary statistics can be obtained
 source("1_Data_preperation/resampling.R")
-repsample_sumstats <- simple_resampler(analysis_dataset)
-repsample_households <- nrow(repsample_sumstats)
-seperated_repsample <- data_seperator(repsample_sumstats, controlvariables_2, moderatorvariables_2, treatmentvariables_2, outcomevariables_2)
-sumstats_repsample <- summary_statistics(seperated_repsample)
+# repsample_sumstats <- simple_resampler(analysis_dataset)
+# repsample_households <- nrow(repsample_sumstats)
+# seperated_repsample <- data_seperator(repsample_sumstats, controlvariables_2, moderatorvariables_2, treatmentvariables_2, outcomevariables_2)
+# sumstats_repsample <- summary_statistics(seperated_repsample)
 
 
 #Provide initial insights on the data (missings, distributions etc.) 
 
-#FOR NOW - oversimplified KNN imputation of data to test model. 
-source("1_Data_preperation/simple_knn/imputation.R")
-testdataset <- simple_knn(data_seperated_1)
+#FOR NOW - oversimplified KNN imputation of data to test model. - this knn makes some factors malformed...
+#source("1_Data_preperation/simple_knn_imputation.R")
+#testdataset <- simple_knn(data_seperated_1)
+#testdataset$moderators <- testdataset$controls[, moderatorvariables_1]
+testdataset$
+
 #Prepare the data by treating missings, constructing subsets, creating new variables
 
 #Provide insights again, but now with the "cleaned data" 
 
-#Estimate the propensity scores and provide analysis of these estimates (we need to normalize somewhere - also need to oversample propensity scores!)
+######Propensity score estimates#####
+
+#Provide 'simple' propensity score estimates - without oversampling treated
+source("2_Propensity_estimation/propensity_score_estimation.R")
+simple_ps_est <- ps_estimator(testdataset$controls,
+                              testdataset$treatment,
+                              samples = 1000,
+                              technique = "BART",
+                              take_means_draws = TRUE,
+                              k_fold_cv = 10,
+                              repeats = 1)
+
+#Provide 'improved' propensity score estimates - with oversampling treated by SMOTE
+testdataset$treatment <- mutate(testdataset$treatment, expRDAll = as_factor(expRDAll))
+testdataset_ps <- as.data.frame(cbind(testdataset$controls, testdataset$treatment))
+resampled_ps_est <- ps_estimator(ps_resample[, !names(ps_resample) %in% c("expRDAll")],
+                                 ps_resample[, names(ps_resample) %in% c("expRDAll")],
+                                 samples = 1000,
+                                 technique = "BART",
+                                 take_means_draws = TRUE,
+                                 k_fold_cv = 10,
+                                 repeats = 1) 
 
 #Provide insights on the estimated propensity scores
 
-#Estimate the posterior treatment function with BCF - basics
+#####Estimate the posterior treatment function with BCF - basics######
+source("3_Model_estimation/make_model_matrix_1.R")
+model_dataset <- make_model_matrix_1(testdataset, simple_ps_est) 
+
+#Data needs to NOT include any missing data
+source("3_Model_estimation/BCF_function.R")
+bcf_test <- BCF_estimation(model_dataset$outcomes, model_dataset$controls, model_dataset$moderators, model_dataset$treatment, model_dataset$ps_estimates)
 
 #Evaluation of results
 
