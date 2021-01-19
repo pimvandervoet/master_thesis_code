@@ -915,7 +915,26 @@ impute_from_other_wave <- function(dat = seperated_dataset){
   return(seperated_dataset_imputed_otherwave)
 }
 
+#' impute_missings_additional_vars
+#'
+#' @description  Imputes missing data for quit_working, recently_married_or_partnered and started_drinking. If value is NA it is set to 0, as these NAs are caused by NAs in the variables upon which they are based - imputing them with values of different waves means no major life event.  
+#'
+#' Output @return seperated_dataset_imputed_additional
+#' Input @param seperated_dataset
+impute_missings_additional_vars <- function(dat = seperated_dataset){
+  
+  seperated_dataset_imputed_additional <- dat
+  
+  for(i in c("started_smoking", "recently_married_or_partnered", "quit_working")){
 
+  selection <- seperated_dataset_imputed_additional$controls[, i]
+  selection[is.na(selection)] <- 0
+  seperated_dataset_imputed_additional$controls[,i] <- selection 
+  }
+  
+  
+  return(seperated_dataset_imputed_additional)
+}
 
 
 #' racial_discrimination_analysis

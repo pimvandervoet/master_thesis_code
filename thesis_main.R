@@ -103,6 +103,7 @@ data_seperated_2 <- impute_from_other_wave(data_seperated_2)
 data_seperated_2 <- remove_unknown_smoke_drink_13(data_seperated_2)
 data_seperated_2 <- knn_impute_moEducation(data_seperated_2)
 data_seperated_2 <- mode_impute_education(data_seperated_2)
+data_seperated_2 <- impute_missings_additional_vars(data_seperated_2)
 
 #Basic insights####
 
