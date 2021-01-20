@@ -20,8 +20,8 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
   results_for_posterior_inference <- list()
   
   #Select outcome
-  for(selected in names(outcome)){
-    
+  for(selected in 1:3){
+  selected_name <- c("syBP", "BMI", "waist")[selected]  
   outcome_select <- outcome[, selected]
   #Obtain model estimates using the bcf function of Hahn, Carvlho, Murray 2020
   bcf_estimates <- bcf(
@@ -54,7 +54,8 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
   
   
   #Return both posterior results and features of all individuals to do posterior inference
-  results_for_posterior_inference <- list(results_for_posterior_inference, paste("posterior_results", selected) = bcf_estimates)
+  listname <- paste("posterior_results", selected_name)
+  results_for_posterior_inference <- append(results_for_posterior_inference, list(listname = bcf_estimates))
   
   }
   results_for_posterior_inference <- list(results_for_posterior_inference, "effect_moderators" = mvars)

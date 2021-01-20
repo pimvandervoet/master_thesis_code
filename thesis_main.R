@@ -132,8 +132,6 @@ source("1_Data_preperation/resampling.R")
 #FOR NOW - oversimplified KNN imputation of data to test model. - this knn makes some factors malformed...
 #source("1_Data_preperation/simple_knn_imputation.R")
 #testdataset <- simple_knn(data_seperated_1)
-#testdataset$moderators <- testdataset$controls[, moderatorvariables_1]
-testdataset$
 
 #Prepare the data by treating missings, constructing subsets, creating new variables
 
@@ -143,30 +141,30 @@ testdataset$
 
 #Provide 'simple' propensity score estimates - without oversampling treated
 source("2_Propensity_estimation/propensity_score_estimation.R")
-simple_ps_est <- ps_estimator(testdataset$controls,
-                              testdataset$treatment,
+simple_ps_est <- ps_estimator(data_seperated_1$controls,
+                              data_seperated_1$treatment,
                               samples = 1000,
                               technique = "BART",
                               take_means_draws = TRUE,
                               k_fold_cv = 10,
                               repeats = 1)
 
-#Provide 'improved' propensity score estimates - with oversampling treated by SMOTE
-testdataset$treatment <- mutate(testdataset$treatment, expRDAll = as_factor(expRDAll))
-testdataset_ps <- as.data.frame(cbind(testdataset$controls, testdataset$treatment))
-resampled_ps_est <- ps_estimator(ps_resample[, !names(ps_resample) %in% c("expRDAll")],
-                                 ps_resample[, names(ps_resample) %in% c("expRDAll")],
-                                 samples = 1000,
-                                 technique = "BART",
-                                 take_means_draws = TRUE,
-                                 k_fold_cv = 10,
-                                 repeats = 1) 
+# #Provide 'improved' propensity score estimates - with oversampling treated by SMOTE
+# data_seperated_1$treatment <- mutate(data_seperated_1$treatment, expRDAll = as_factor(expRDAll))
+# data_seperated_1_ps <- as.data.frame(cbind(data_seperated_1$controls, data_seperated_1$treatment))
+# resampled_ps_est <- ps_estimator(ps_resample[, !names(ps_resample) %in% c("expRDAll")],
+#                                  ps_resample[, names(ps_resample) %in% c("expRDAll")],
+#                                  samples = 1000,
+#                                  technique = "BART",
+#                                  take_means_draws = TRUE,
+#                                  k_fold_cv = 10,
+#                                  repeats = 1) 
 
 #Provide insights on the estimated propensity scores
 
 #####Estimate the posterior treatment function with BCF - basics######
 source("3_Model_estimation/make_model_matrix_1.R")
-model_dataset <- make_model_matrix_1(testdataset, simple_ps_est) 
+model_dataset <- make_model_matrix_1(data_seperated_1, simple_ps_est) 
 
 #Data needs to NOT include any missing data
 source("3_Model_estimation/BCF_function.R")
