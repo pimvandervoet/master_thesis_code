@@ -53,6 +53,7 @@ knn_impute_moEducation <- function(incomplete_data = seperated_data, k_fold = 10
       data = incomplete_controls,
       variable = incomplete_controls_to_impute,
       k = k_fold,
+      dist_var = c("sex", "race", "wealth_bin", "age", "education"),
       impNA = TRUE
     )
   complete_data$controls <- complete_data$controls[, 1:no_controls]

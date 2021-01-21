@@ -19,6 +19,9 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
   
   results_for_posterior_inference <- list()
   
+  #Remove sample weight from control variables
+  cvars <- cvars[, 2:dim(cvars)[2]]
+  
   #Select outcome
   for(selected in 1:3){
   selected_name <- c("syBP", "BMI", "waist")[selected]  
@@ -58,7 +61,7 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
   results_for_posterior_inference <- append(results_for_posterior_inference, list(listname = bcf_estimates))
   
   }
-  results_for_posterior_inference <- list(results_for_posterior_inference, "effect_moderators" = mvars)
+  results_for_posterior_inference <- append(results_for_posterior_inference, "effect_moderators" = mvars)
   return(results_for_posterior_inference)
   
   }
