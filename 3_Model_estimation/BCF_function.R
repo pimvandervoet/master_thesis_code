@@ -61,7 +61,7 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
   results_for_posterior_inference <- append(results_for_posterior_inference, list(listname = bcf_estimates))
   
   }
-  results_for_posterior_inference <- append(results_for_posterior_inference, "effect_moderators" = mvars)
+  results_for_posterior_inference <- append(results_for_posterior_inference, "effect_moderators" = cbind(mvars, ps_estimates))
   return(results_for_posterior_inference)
   
   }

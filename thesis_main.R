@@ -229,6 +229,7 @@ names(bcf_test2$`posterior results`) <- c("syBP", "BMI", "waist")
 bcf_test_smote <- BCF_estimation(model_dataset_smote_1$outcomes, model_dataset_smote_1$controls, model_dataset_smote_1$moderators, model_dataset_smote_1$treatment, model_dataset_smote_1$ps_estimates)
 names(bcf_test_smote)[1] <- "posterior results"
 names(bcf_test_smote$`posterior results`) <- c("syBP", "BMI", "waist")
+names(bcf_test_smote$effect_moderators) <- c("sex", "wealth_bin", "age", "race_white", "race_black_african_american", "race_other")
 
 #Difference model with SMOTE pi hat estimates
 bcf_test_smote2 <- BCF_estimation(model_dataset_smote_2$outcomes, model_dataset_smote_2$controls, model_dataset_smote_2$moderators, model_dataset_smote_2$treatment, model_dataset_smote_2$ps_estimates)
