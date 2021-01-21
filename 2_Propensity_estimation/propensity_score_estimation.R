@@ -102,9 +102,10 @@ ps_estimator <-
             transposed = FALSE,
           )
           #Use bart execution pnorm output. Make user choose to take averages or not -- need to transpose if not taking averages!
-        } else if(technique == "other")
+        } else if(technique == "LOGIT")
         {
           #Some other technique for estimation -- to be added if desired
+          #Need to do some logit form here. 
         }
         
         #Fill output matrix with output for crossfold k

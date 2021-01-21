@@ -103,6 +103,7 @@ data_seperated_2 <- impute_from_other_wave(data_seperated_2)
 data_seperated_2 <- remove_unknown_smoke_drink_13(data_seperated_2)
 data_seperated_2 <- knn_impute_moEducation(data_seperated_2)
 data_seperated_2 <- mode_impute_education(data_seperated_2)
+data_seperated_2 <- impute_missings_additional_vars(data_seperated_2)
 
 #Basic insights####
 
@@ -131,8 +132,6 @@ source("1_Data_preperation/resampling.R")
 #FOR NOW - oversimplified KNN imputation of data to test model. - this knn makes some factors malformed...
 #source("1_Data_preperation/simple_knn_imputation.R")
 #testdataset <- simple_knn(data_seperated_1)
-#testdataset$moderators <- testdataset$controls[, moderatorvariables_1]
-testdataset$
 
 #Prepare the data by treating missings, constructing subsets, creating new variables
 
@@ -142,35 +141,108 @@ testdataset$
 
 #Provide 'simple' propensity score estimates - without oversampling treated
 source("2_Propensity_estimation/propensity_score_estimation.R")
-simple_ps_est <- ps_estimator(testdataset$controls,
-                              testdataset$treatment,
+library(ROCR)
+
+simple_ps_est <- ps_estimator(data_seperated_1$controls[,!names(data_seperated_1$controls) %in% c("sampleWeight")],
+                              data_seperated_1$treatment,
                               samples = 1000,
                               technique = "BART",
                               take_means_draws = TRUE,
                               k_fold_cv = 10,
                               repeats = 1)
 
-#Provide 'improved' propensity score estimates - with oversampling treated by SMOTE
-testdataset$treatment <- mutate(testdataset$treatment, expRDAll = as_factor(expRDAll))
-testdataset_ps <- as.data.frame(cbind(testdataset$controls, testdataset$treatment))
-resampled_ps_est <- ps_estimator(ps_resample[, !names(ps_resample) %in% c("expRDAll")],
-                                 ps_resample[, names(ps_resample) %in% c("expRDAll")],
-                                 samples = 1000,
-                                 technique = "BART",
-                                 take_means_draws = TRUE,
-                                 k_fold_cv = 10,
-                                 repeats = 1) 
+pred_simple <- prediction(simple_ps_est, data_seperated_1$treatment)
+perf_simple <- performance(pred_simple,"tpr","fpr")
+plot(perf,colorize=TRUE)
+auc_ROCR_simple_1 <- performance(pred, measure = "auc")
+auc_ROCR_simple_1 <- auc_ROCR_simple_1@y.values[[1]]
 
-#Provide insights on the estimated propensity scores
+simple_ps_est_2 <- ps_estimator(data_seperated_2$controls[,!names(data_seperated_2$controls) %in% c("sampleWeight")],
+                               data_seperated_2$treatment,
+                               samples = 1000,
+                               technique = "BART",
+                               take_means_draws = TRUE,
+                               k_fold_cv = 10,
+                               repeats = 1)
 
-#####Estimate the posterior treatment function with BCF - basics######
+
 source("3_Model_estimation/make_model_matrix_1.R")
-model_dataset <- make_model_matrix_1(testdataset, simple_ps_est) 
+model_dataset <- make_model_matrix_1(data_seperated_1, simple_ps_est) 
+model_dataset_2 <- make_model_matrix_1(data_seperated_2, simple_ps_est_2) 
 
-#Data needs to NOT include any missing data
+library(imbalance)
+os_input_1 <- as.data.frame(cbind(model_dataset$controls, model_dataset$treatment))
+oversample_SMOTE_1 <- oversample(os_input_1[,!names(os_input_1) %in% c("sampleWeight")], 0.8, "SMOTE", filtering = FALSE, classAttr =  "expRDAll")
+treatment_tib <- tibble(oversample_SMOTE_1$expRDAll)
+names(treatment_tib) <- c("expRDAll")
+
+os_input_2 <- as.data.frame(cbind(model_dataset_2$controls, model_dataset_2$treatment))
+oversample_SMOTE_2 <- oversample(os_input_2[,!names(os_input_2) %in% c("sampleWeight")], 0.8, "SMOTE", filtering = FALSE, classAttr =  "expRDAll")
+treatment_tib_2 <- tibble(oversample_SMOTE_2$expRDAll)
+names(treatment_tib_2) <- c("expRDAll")
+
+#Obtain SMOTE pihat
+
+oversampled_ps_est <- ps_estimator(oversample_SMOTE_1[, !names(oversample_SMOTE_1) %in% c("expRDAll")],
+                              treatment_tib,
+                              samples = 1000,
+                              technique = "BART",
+                              take_means_draws = TRUE,
+                              k_fold_cv = 10,
+                              repeats = 1)
+
+oversampled_ps_est_2 <- ps_estimator(oversample_SMOTE_2[, !names(oversample_SMOTE_2) %in% c("expRDAll")],
+                                treatment_tib_2,
+                                samples = 1000,
+                                technique = "BART",
+                                take_means_draws = TRUE,
+                                k_fold_cv = 10,
+                                repeats = 1)
+
+model_dataset_smote_1 <- model_dataset
+model_dataset_smote_1$ps_estimates <- oversampled_ps_est[1:dim(model_dataset_smote_1$treatment)[1], ]
+
+pred_smote_1 <- prediction(model_dataset_smote_1$ps_estimates, model_dataset_smote_1$treatment)
+perf_smote_1 <- performance(pred_smote_1,"tpr","fpr")
+plot(perf,colorize=TRUE)
+auc_ROCR_smote_1 <- performance(pred, measure = "auc")
+auc_ROCR_smote_1 <- auc_ROCR_smote_1@y.values[[1]]
+
+#Prep data to go into model
+model_dataset_smote_2 <- model_dataset
+model_dataset_smote_2$ps_estimates <- oversampled_ps_est_2[1:dim(model_dataset_smote_2$treatment)[1], ]
+
+#Obtain posterior results#####
 source("3_Model_estimation/BCF_function.R")
-bcf_test <- BCF_estimation(model_dataset$outcomes, model_dataset$controls, model_dataset$moderators, model_dataset$treatment, model_dataset$ps_estimates)
 
-#Evaluation of results
+#Cross-sectional model with 'simple'estimates for pi hat
+bcf_test <- BCF_estimation(model_dataset$outcomes, model_dataset$controls, model_dataset$moderators, model_dataset$treatment, model_dataset$ps_estimates)
+names(bcf_test)[1] <- "posterior results"
+names(bcf_test$`posterior results`) <- c("syBP", "BMI", "waist")
+ 
+#Difference model with 'simple' estimates for pi hat
+bcf_test2 <- BCF_estimation(model_dataset_2$outcomes, model_dataset_2$controls, model_dataset_2$moderators, model_dataset_2$treatment, model_dataset_2$ps_estimates)
+names(bcf_test2)[1] <- "posterior results"
+names(bcf_test2$`posterior results`) <- c("syBP", "BMI", "waist")
+
+#Cross-sectional model with SMOTE pi hat estimates
+bcf_test_smote <- BCF_estimation(model_dataset_smote_1$outcomes, model_dataset_smote_1$controls, model_dataset_smote_1$moderators, model_dataset_smote_1$treatment, model_dataset_smote_1$ps_estimates)
+names(bcf_test_smote)[1] <- "posterior results"
+names(bcf_test_smote$`posterior results`) <- c("syBP", "BMI", "waist")
+
+#Difference model with SMOTE pi hat estimates
+bcf_test_smote2 <- BCF_estimation(model_dataset_smote_2$outcomes, model_dataset_smote_2$controls, model_dataset_smote_2$moderators, model_dataset_smote_2$treatment, model_dataset_smote_2$ps_estimates)
+names(bcf_test_smote2)[1] <- "posterior results"
+names(bcf_test_smote2$`posterior results`) <- c("syBP", "BMI", "waist")
+
+#####Evaluation of results#####
+
+#Cross sectional model with SMOTE pi hat estimates
+
+
+
+
+
+
 
 #Estimate posterior treatment function including sensitivity analysis
