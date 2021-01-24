@@ -146,21 +146,21 @@ library(ROCR)
 simple_ps_est <- ps_estimator(data_seperated_1$controls[,!names(data_seperated_1$controls) %in% c("sampleWeight")],
                               data_seperated_1$treatment,
                               samples = 1000,
-                              technique = "BART",
+                              technique = "BARTMACHINE",
                               take_means_draws = TRUE,
                               k_fold_cv = 10,
                               repeats = 1)
 
 pred_simple <- prediction(simple_ps_est, data_seperated_1$treatment)
 perf_simple <- performance(pred_simple,"tpr","fpr")
-plot(perf,colorize=TRUE)
-auc_ROCR_simple_1 <- performance(pred, measure = "auc")
+plot(perf_simple,colorize=TRUE)
+auc_ROCR_simple_1 <- performance(pred_simple, measure = "auc")
 auc_ROCR_simple_1 <- auc_ROCR_simple_1@y.values[[1]]
 
 simple_ps_est_2 <- ps_estimator(data_seperated_2$controls[,!names(data_seperated_2$controls) %in% c("sampleWeight")],
                                data_seperated_2$treatment,
                                samples = 1000,
-                               technique = "BART",
+                               technique = "BARTMACHINE",
                                take_means_draws = TRUE,
                                k_fold_cv = 10,
                                repeats = 1)
@@ -186,15 +186,15 @@ names(treatment_tib_2) <- c("expRDAll")
 oversampled_ps_est <- ps_estimator(oversample_SMOTE_1[, !names(oversample_SMOTE_1) %in% c("expRDAll")],
                               treatment_tib,
                               samples = 1000,
-                              technique = "BART",
+                              technique = "BARTMACHINE",
                               take_means_draws = TRUE,
-                              k_fold_cv = 10,
+                              k_fold_cv = 5,
                               repeats = 1)
 
 oversampled_ps_est_2 <- ps_estimator(oversample_SMOTE_2[, !names(oversample_SMOTE_2) %in% c("expRDAll")],
                                 treatment_tib_2,
                                 samples = 1000,
-                                technique = "BART",
+                                technique = "BARTMACHINE",
                                 take_means_draws = TRUE,
                                 k_fold_cv = 10,
                                 repeats = 1)
@@ -204,8 +204,8 @@ model_dataset_smote_1$ps_estimates <- oversampled_ps_est[1:dim(model_dataset_smo
 
 pred_smote_1 <- prediction(model_dataset_smote_1$ps_estimates, model_dataset_smote_1$treatment)
 perf_smote_1 <- performance(pred_smote_1,"tpr","fpr")
-plot(perf,colorize=TRUE)
-auc_ROCR_smote_1 <- performance(pred, measure = "auc")
+plot(perf_smote_1,colorize=TRUE)
+auc_ROCR_smote_1 <- performance(pred_smote_1, measure = "auc")
 auc_ROCR_smote_1 <- auc_ROCR_smote_1@y.values[[1]]
 
 #Prep data to go into model
