@@ -217,24 +217,19 @@ source("3_Model_estimation/BCF_function.R")
 
 #Cross-sectional model with 'simple'estimates for pi hat
 bcf_test <- BCF_estimation(model_dataset$outcomes, model_dataset$controls, model_dataset$moderators, model_dataset$treatment, model_dataset$ps_estimates)
-names(bcf_test)[1] <- "posterior results"
-names(bcf_test$`posterior results`) <- c("syBP", "BMI", "waist")
- 
+attributes(bcf_test$effect_moderators)$dimnames[[2]][[7]] <- "ps_estimates"
+colnames(bcf_test$effect_moderators) <- attributes(bcf_test$effect_moderators)$dimnames[[2]]
 #Difference model with 'simple' estimates for pi hat
 bcf_test2 <- BCF_estimation(model_dataset_2$outcomes, model_dataset_2$controls, model_dataset_2$moderators, model_dataset_2$treatment, model_dataset_2$ps_estimates)
-names(bcf_test2)[1] <- "posterior results"
-names(bcf_test2$`posterior results`) <- c("syBP", "BMI", "waist")
+
 
 #Cross-sectional model with SMOTE pi hat estimates
 bcf_test_smote <- BCF_estimation(model_dataset_smote_1$outcomes, model_dataset_smote_1$controls, model_dataset_smote_1$moderators, model_dataset_smote_1$treatment, model_dataset_smote_1$ps_estimates)
-names(bcf_test_smote)[1] <- "posterior results"
-names(bcf_test_smote$`posterior results`) <- c("syBP", "BMI", "waist")
-names(bcf_test_smote$effect_moderators) <- c("sex", "wealth_bin", "age", "race_white", "race_black_african_american", "race_other")
+
 
 #Difference model with SMOTE pi hat estimates
 bcf_test_smote2 <- BCF_estimation(model_dataset_smote_2$outcomes, model_dataset_smote_2$controls, model_dataset_smote_2$moderators, model_dataset_smote_2$treatment, model_dataset_smote_2$ps_estimates)
-names(bcf_test_smote2)[1] <- "posterior results"
-names(bcf_test_smote2$`posterior results`) <- c("syBP", "BMI", "waist")
+
 
 #####Evaluation of results#####
 
