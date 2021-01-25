@@ -33,8 +33,8 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     x_control = cvars,
     x_moderate = mvars,
     pihat = ps_estimates,
-    nburn = 2000L,
-    nsim = 4000L,
+    nburn = 200L,
+    nsim = 400L,
     nthin = 3L,
     update_interval = 200L,
     #Prior specification and nr of trees etc. according to specification of Hahn, Murray, Carvalho 2020
@@ -58,10 +58,10 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
   
   #Return both posterior results and features of all individuals to do posterior inference
   listname <- paste("posterior_results", selected_name)
-  results_for_posterior_inference <- append(results_for_posterior_inference, list(listname = bcf_estimates))
+  results_for_posterior_inference[[listname]] <- bcf_estimates
   
   }
-  results_for_posterior_inference <- append(results_for_posterior_inference, "effect_moderators" = cbind(mvars, ps_estimates))
+  results_for_posterior_inference[["effect_moderators"]] <- cbind(mvars, ps_estimates)
   return(results_for_posterior_inference)
   
   }
