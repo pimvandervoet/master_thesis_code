@@ -233,7 +233,7 @@ data_formatter <- function(non_formatted_data = NA) {
       for (observation in 1:dim(formatted_data)[1]) {
         if (!is.na(variable[observation])) {
           if (variable[observation] == 2) {
-            variable[observation] <- 0
+            variable[observation] <- 0 #Female = 0, male = 1
             
           }
           
