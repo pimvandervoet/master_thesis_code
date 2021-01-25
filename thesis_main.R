@@ -162,7 +162,7 @@ simple_ps_est_2 <- ps_estimator(data_seperated_2$controls[,!names(data_seperated
                                samples = 1000,
                                technique = "BARTMACHINE",
                                take_means_draws = TRUE,
-                               k_fold_cv = 10,
+                               k_fold_cv = 1,
                                repeats = 1)
 
 
@@ -188,7 +188,7 @@ oversampled_ps_est <- ps_estimator(oversample_SMOTE_1[, !names(oversample_SMOTE_
                               samples = 1000,
                               technique = "BARTMACHINE",
                               take_means_draws = TRUE,
-                              k_fold_cv = 5,
+                              k_fold_cv = 1,
                               repeats = 1)
 
 oversampled_ps_est_2 <- ps_estimator(oversample_SMOTE_2[, !names(oversample_SMOTE_2) %in% c("expRDAll")],
@@ -196,7 +196,7 @@ oversampled_ps_est_2 <- ps_estimator(oversample_SMOTE_2[, !names(oversample_SMOT
                                 samples = 1000,
                                 technique = "BARTMACHINE",
                                 take_means_draws = TRUE,
-                                k_fold_cv = 10,
+                                k_fold_cv = 1,
                                 repeats = 1)
 
 model_dataset_smote_1 <- model_dataset
