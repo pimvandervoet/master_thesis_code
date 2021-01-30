@@ -18,7 +18,11 @@ ps_estimator <-
            technique = "BARTMACHINE",
            take_means_draws = TRUE,
            k_fold_cv = 10,
-           repeats = 1) {
+           repeats = 1,
+           k_parameter = 2,
+           m_parameter = 50,
+           smote_kfold = FALSE
+           ) {
     #Preprocessing steps if needed
     set.seed(30121997)
     
@@ -128,7 +132,7 @@ ps_estimator <-
         } else if (technique == "BARTMACHINE") {
           options(java.parameters = "-Xmx10g")
           library(bartMachine)
-          set_bart_machine_num_cores(7)
+          set_bart_machine_num_cores(5)
           #Check if train treatment is binary
           if (typeof(train_treatment) == "double") {
             train_treatment <- as_factor(train_treatment)
@@ -143,12 +147,12 @@ ps_estimator <-
             model_execution_obj <- bartMachine(
               X = train_predictors,
               y = train_treatment,
-              num_trees = 50,
+              num_trees = m_parameter,
               num_burn_in = 250,
               num_iterations_after_burn_in = samples,
               alpha = 0.95,
               beta = 2,
-              k = 2,
+              k = k_parameter,
               q = 0.9,
               nu = 3,
               prob_rule_class = 0.5,
@@ -251,7 +255,12 @@ ps_estimator <-
     }
     
     #Return all the propensity score estimates
+    if(smote_kfold == FALSE){
     return(propensity_scores_total)
+    }else if(smote_kfold == TRUE){
+      return(model_execution_obj)
+    }
+    
   }
 
 #' ps_analysis

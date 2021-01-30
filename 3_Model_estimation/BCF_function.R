@@ -33,8 +33,8 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     x_control = cvars,
     x_moderate = mvars,
     pihat = ps_estimates,
-    nburn = 200L,
-    nsim = 400L,
+    nburn = 2000L,
+    nsim = 10000L,
     nthin = 3L,
     update_interval = 200L,
     #Prior specification and nr of trees etc. according to specification of Hahn, Murray, Carvalho 2020
