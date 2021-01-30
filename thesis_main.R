@@ -119,12 +119,126 @@ treatment_plots <- treatment_analysis(data_seperated_1)
 #Deal with missing data in control variables by considering whether high correlation with treatment - high correlation implicates that there may be bias induced by removing variable
 
 
-#Do simple resample to make sure that 'representative summary statistics can be obtained
-source("1_Data_preperation/resampling.R")
-# repsample_sumstats <- simple_resampler(analysis_dataset)
-# repsample_households <- nrow(repsample_sumstats)
-# seperated_repsample <- data_seperator(repsample_sumstats, controlvariables_2, moderatorvariables_2, treatmentvariables_2, outcomevariables_2)
-# sumstats_repsample <- summary_statistics(seperated_repsample)
+#Do simple resample to make sure that 'representative summary statistics can be obtained -- this is no longer valid!
+# source("1_Data_preperation/resampling.R")
+#  repsample_sumstats <- simple_resampler(analysis_dataset)
+#  repsample_households <- nrow(repsample_sumstats)
+#  seperated_repsample <- data_seperator(repsample_sumstats, controlvariables_2, moderatorvariables_2, treatmentvariables_1, outcomevariables_2)
+#  sumstats_repsample <- summary_statistics(seperated_repsample)
+
+#Obtain weighted summary statistics#####
+library(radiant.data)
+weightvector_1 <- data_seperated_1$controls$sampleWeight
+treated_1 <- which(data_seperated_1$treatment == 1)
+non_treated_1 <- which(data_seperated_1$treatment == 0)
+weighted_means_1 <-  c("sex tr" = weighted.mean(data_seperated_1$moderators$sex[treated_1], weightvector_1[treated_1 ]),
+                     "age tr" = weighted.mean(data_seperated_1$moderators$age[treated_1], weightvector_1[treated_1 ]),
+                     "syBP tr" = weighted.mean(data_seperated_1$outcomes$syBP_mean[treated_1 ], weightvector_1[treated_1 ]),
+                     "BMI tr"  = weighted.mean(data_seperated_1$outcomes$BMI[treated_1 ], weightvector_1[treated_1 ]),
+                     "waist tr" = weighted.mean(data_seperated_1$outcomes$waist[treated_1 ], weightvector_1[treated_1 ]),
+                     "sex nt" = weighted.mean(data_seperated_1$moderators$sex[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                     "age nt" = weighted.mean(data_seperated_1$moderators$age[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                     "syBP nt" = weighted.mean(data_seperated_1$outcomes$syBP_mean[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                     "BMI nt"  = weighted.mean(data_seperated_1$outcomes$BMI[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                     "waist nt" = weighted.mean(data_seperated_1$outcomes$waist[non_treated_1 ], weightvector_1[non_treated_1 ])
+)
+weighted_sd_1 <-  c("sex tr" = weighted.sd(data_seperated_1$moderators$sex[treated_1 ], weightvector_1[treated_1 ]),
+                       "age tr" = weighted.sd(data_seperated_1$moderators$age[treated_1 ], weightvector_1[treated_1 ]),
+                       "syBP tr" = weighted.sd(data_seperated_1$outcomes$syBP_mean[treated_1 ], weightvector_1[treated_1 ]),
+                       "BMI tr"  = weighted.sd(data_seperated_1$outcomes$BMI[treated_1 ], weightvector_1[treated_1 ]),
+                       "waist tr" = weighted.sd(data_seperated_1$outcomes$waist[treated_1 ], weightvector_1[treated_1 ]),
+                       "sex nt" = weighted.sd(data_seperated_1$moderators$sex[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                       "age nt" = weighted.sd(data_seperated_1$moderators$age[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                       "syBP nt" = weighted.sd(data_seperated_1$outcomes$syBP_mean[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                       "BMI nt"  = weighted.sd(data_seperated_1$outcomes$BMI[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                       "waist nt" = weighted.sd(data_seperated_1$outcomes$waist[non_treated_1 ], weightvector_1[non_treated_1 ])
+)
+
+
+counts_1 <- c("white_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$race == "1.white/caucasian"), treated_1)]),
+              "black_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$race == "2.black/african american"), treated_1)]),
+              "other_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$race == "3.other"), treated_1)]),
+              "wb1_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "1"), treated_1)]),
+              "wb2_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "2"), treated_1)]),
+              "wb3_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "3"), treated_1)]),
+              "wb4_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "4"), treated_1)]),
+              "wb5_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "5"), treated_1)]),
+              "wb6_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "6"), treated_1)]),
+              "wb7_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "7"), treated_1)]),
+              "wb8_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "8"), treated_1)]),
+              "wb9_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "9"), treated_1)]),
+              "wb10_tr" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "10"), treated_1)]),
+              "white_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$race == "1.white/caucasian"), non_treated_1)]),
+              "black_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$race == "2.black/african american"), non_treated_1)]),
+              "other_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$race == "3.other"), non_treated_1)]),
+              "wb1_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "1"), non_treated_1)]),
+              "wb2_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "2"), non_treated_1)]),
+              "wb3_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "3"), non_treated_1)]),
+              "wb4_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "4"), non_treated_1)]),
+              "wb5_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "5"), non_treated_1)]),
+              "wb6_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "6"), non_treated_1)]),
+              "wb7_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "7"), non_treated_1)]),
+              "wb8_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "8"), non_treated_1)]),
+              "wb9_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "9"), non_treated_1)]),
+              "wb10_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "10"), non_treated_1)])
+              )
+
+
+
+weightvector_2 <- data_seperated_2$controls$sampleWeight
+treated_2 <- which(data_seperated_2$treatment == 1)
+non_treated_2 <- which(data_seperated_2$treatment == 0)
+weighted_means_2 <-  c("sex tr" = weighted.mean(data_seperated_2$moderators$sex[treated_2], weightvector_2[treated_2 ]),
+                       "age tr" = weighted.mean(data_seperated_2$moderators$age[treated_2], weightvector_2[treated_2 ]),
+                       "syBP tr" = weighted.mean(data_seperated_2$outcomes$syBP_mean[treated_2 ], weightvector_2[treated_2 ]),
+                       "BMI tr"  = weighted.mean(data_seperated_2$outcomes$BMI[treated_2 ], weightvector_2[treated_2 ]),
+                       "waist tr" = weighted.mean(data_seperated_2$outcomes$waist[treated_2 ], weightvector_2[treated_2 ]),
+                       "sex nt" = weighted.mean(data_seperated_2$moderators$sex[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                       "age nt" = weighted.mean(data_seperated_2$moderators$age[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                       "syBP nt" = weighted.mean(data_seperated_2$outcomes$syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                       "BMI nt"  = weighted.mean(data_seperated_2$outcomes$BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                       "waist nt" = weighted.mean(data_seperated_2$outcomes$waist[non_treated_2 ], weightvector_2[non_treated_2 ])
+)
+weighted_sd_2 <-  c("sex tr" = weighted.sd(data_seperated_2$moderators$sex[treated_2 ], weightvector_2[treated_2 ]),
+                    "age tr" = weighted.sd(data_seperated_2$moderators$age[treated_2 ], weightvector_2[treated_2 ]),
+                    "syBP tr" = weighted.sd(data_seperated_2$outcomes$syBP_mean[treated_2 ], weightvector_2[treated_2 ]),
+                    "BMI tr"  = weighted.sd(data_seperated_2$outcomes$BMI[treated_2 ], weightvector_2[treated_2 ]),
+                    "waist tr" = weighted.sd(data_seperated_2$outcomes$waist[treated_2 ], weightvector_2[treated_2 ]),
+                    "sex nt" = weighted.sd(data_seperated_2$moderators$sex[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                    "age nt" = weighted.sd(data_seperated_2$moderators$age[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                    "syBP nt" = weighted.sd(data_seperated_2$outcomes$syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                    "BMI nt"  = weighted.sd(data_seperated_2$outcomes$BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                    "waist nt" = weighted.sd(data_seperated_2$outcomes$waist[non_treated_2 ], weightvector_2[non_treated_2 ])
+)
+
+
+counts_2 <- c("white_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$race == "1.white/caucasian"), treated_2)]),
+              "black_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$race == "2.black/african american"), treated_2)]),
+              "other_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$race == "3.other"), treated_2)]),
+              "wb1_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "1"), treated_2)]),
+              "wb2_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "2"), treated_2)]),
+              "wb3_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "3"), treated_2)]),
+              "wb4_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "4"), treated_2)]),
+              "wb5_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "5"), treated_2)]),
+              "wb6_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "6"), treated_2)]),
+              "wb7_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "7"), treated_2)]),
+              "wb8_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "8"), treated_2)]),
+              "wb9_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "9"), treated_2)]),
+              "wb10_tr" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "10"), treated_2)]),
+              "white_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$race == "1.white/caucasian"), non_treated_2)]),
+              "black_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$race == "2.black/african american"), non_treated_2)]),
+              "other_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$race == "3.other"), non_treated_2)]),
+              "wb1_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "1"), non_treated_2)]),
+              "wb2_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "2"), non_treated_2)]),
+              "wb3_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "3"), non_treated_2)]),
+              "wb4_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "4"), non_treated_2)]),
+              "wb5_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "5"), non_treated_2)]),
+              "wb6_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "6"), non_treated_2)]),
+              "wb7_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "7"), non_treated_2)]),
+              "wb8_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "8"), non_treated_2)]),
+              "wb9_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "9"), non_treated_2)]),
+              "wb10_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "10"), non_treated_2)])
+)
 
 
 #Provide initial insights on the data (missings, distributions etc.) 
@@ -139,6 +253,12 @@ source("1_Data_preperation/resampling.R")
 
 ######Propensity score estimates#####
 
+#Perform K-fold cross validation to do parameter tuning
+source("2_Propensity_estimation/cv_ps_est.R")
+#AUC_matrix <- cv_ps_est(data_seperated_1, k_fold = 10, k_par = c(4), m_par = c(50))
+
+
+
 #Provide 'simple' propensity score estimates - without oversampling treated
 source("2_Propensity_estimation/propensity_score_estimation.R")
 library(ROCR)
@@ -146,102 +266,133 @@ library(ROCR)
 simple_ps_est <- ps_estimator(data_seperated_1$controls[,!names(data_seperated_1$controls) %in% c("sampleWeight")],
                               data_seperated_1$treatment,
                               samples = 1000,
-                              technique = "BART",
+                              technique = "BARTMACHINE",
                               take_means_draws = TRUE,
                               k_fold_cv = 10,
-                              repeats = 1)
+                              repeats = 1,
+                              k_parameter = 3,
+                              m_parameter = 100)
 
 pred_simple <- prediction(simple_ps_est, data_seperated_1$treatment)
 perf_simple <- performance(pred_simple,"tpr","fpr")
-plot(perf,colorize=TRUE)
-auc_ROCR_simple_1 <- performance(pred, measure = "auc")
+auc_plot_1 <- plot(perf_simple,colorize=TRUE)
+auc_ROCR_simple_1 <- performance(pred_simple, measure = "auc")
 auc_ROCR_simple_1 <- auc_ROCR_simple_1@y.values[[1]]
 
 simple_ps_est_2 <- ps_estimator(data_seperated_2$controls[,!names(data_seperated_2$controls) %in% c("sampleWeight")],
                                data_seperated_2$treatment,
                                samples = 1000,
-                               technique = "BART",
+                               technique = "BARTMACHINE",
                                take_means_draws = TRUE,
-                               k_fold_cv = 10,
-                               repeats = 1)
+                               k_fold_cv = 1,
+                               repeats = 1,
+                               k_parameter = 3,
+                               m_parameter = 100)
 
+pred_simple_2 <- prediction(simple_ps_est_2, data_seperated_2$treatment)
+perf_simple_2 <- performance(pred_simple_2,"tpr","fpr")
+auc_plot_2 <- plot(perf_simple_2,colorize=TRUE)
+auc_ROCR_simple_2 <- performance(pred_simple_2, measure = "auc")
+auc_ROCR_simple_2 <- auc_ROCR_simple_2@y.values[[1]]
 
 source("3_Model_estimation/make_model_matrix_1.R")
 model_dataset <- make_model_matrix_1(data_seperated_1, simple_ps_est) 
 model_dataset_2 <- make_model_matrix_1(data_seperated_2, simple_ps_est_2) 
 
-library(imbalance)
-os_input_1 <- as.data.frame(cbind(model_dataset$controls, model_dataset$treatment))
-oversample_SMOTE_1 <- oversample(os_input_1[,!names(os_input_1) %in% c("sampleWeight")], 0.8, "SMOTE", filtering = FALSE, classAttr =  "expRDAll")
-treatment_tib <- tibble(oversample_SMOTE_1$expRDAll)
-names(treatment_tib) <- c("expRDAll")
-
-os_input_2 <- as.data.frame(cbind(model_dataset_2$controls, model_dataset_2$treatment))
-oversample_SMOTE_2 <- oversample(os_input_2[,!names(os_input_2) %in% c("sampleWeight")], 0.8, "SMOTE", filtering = FALSE, classAttr =  "expRDAll")
-treatment_tib_2 <- tibble(oversample_SMOTE_2$expRDAll)
-names(treatment_tib_2) <- c("expRDAll")
+# library(imbalance)
+# os_input_1 <- as.data.frame(cbind(model_dataset$controls, model_dataset$treatment))
+# oversample_SMOTE_1 <- oversample(os_input_1[,!names(os_input_1) %in% c("sampleWeight")], 0.8, "SMOTE", filtering = FALSE, classAttr =  "expRDAll")
+# treatment_tib <- tibble(oversample_SMOTE_1$expRDAll)
+# names(treatment_tib) <- c("expRDAll")
+# 
+# os_input_2 <- as.data.frame(cbind(model_dataset_2$controls, model_dataset_2$treatment))
+# oversample_SMOTE_2 <- oversample(os_input_2[,!names(os_input_2) %in% c("sampleWeight")], 0.8, "SMOTE", filtering = FALSE, classAttr =  "expRDAll")
+# treatment_tib_2 <- tibble(oversample_SMOTE_2$expRDAll)
+# names(treatment_tib_2) <- c("expRDAll")
 
 #Obtain SMOTE pihat
 
-oversampled_ps_est <- ps_estimator(oversample_SMOTE_1[, !names(oversample_SMOTE_1) %in% c("expRDAll")],
-                              treatment_tib,
-                              samples = 1000,
-                              technique = "BART",
-                              take_means_draws = TRUE,
-                              k_fold_cv = 10,
-                              repeats = 1)
-
-oversampled_ps_est_2 <- ps_estimator(oversample_SMOTE_2[, !names(oversample_SMOTE_2) %in% c("expRDAll")],
-                                treatment_tib_2,
-                                samples = 1000,
-                                technique = "BART",
-                                take_means_draws = TRUE,
-                                k_fold_cv = 10,
-                                repeats = 1)
-
-model_dataset_smote_1 <- model_dataset
-model_dataset_smote_1$ps_estimates <- oversampled_ps_est[1:dim(model_dataset_smote_1$treatment)[1], ]
-
-pred_smote_1 <- prediction(model_dataset_smote_1$ps_estimates, model_dataset_smote_1$treatment)
-perf_smote_1 <- performance(pred_smote_1,"tpr","fpr")
-plot(perf,colorize=TRUE)
-auc_ROCR_smote_1 <- performance(pred, measure = "auc")
-auc_ROCR_smote_1 <- auc_ROCR_smote_1@y.values[[1]]
-
-#Prep data to go into model
-model_dataset_smote_2 <- model_dataset
-model_dataset_smote_2$ps_estimates <- oversampled_ps_est_2[1:dim(model_dataset_smote_2$treatment)[1], ]
+# oversampled_ps_est <- ps_estimator(oversample_SMOTE_1[, !names(oversample_SMOTE_1) %in% c("expRDAll")],
+#                               treatment_tib,
+#                               samples = 1000,
+#                               technique = "BARTMACHINE",
+#                               take_means_draws = TRUE,
+#                               k_fold_cv = 1,
+#                               repeats = 1)
+# 
+# oversampled_ps_est_2 <- ps_estimator(oversample_SMOTE_2[, !names(oversample_SMOTE_2) %in% c("expRDAll")],
+#                                 treatment_tib_2,
+#                                 samples = 1000,
+#                                 technique = "BARTMACHINE",
+#                                 take_means_draws = TRUE,
+#                                 k_fold_cv = 1,
+#                                 repeats = 1)
+# 
+# model_dataset_smote_1 <- model_dataset
+# model_dataset_smote_1$ps_estimates <- oversampled_ps_est[1:dim(model_dataset_smote_1$treatment)[1], ]
+# 
+# pred_smote_1 <- prediction(model_dataset_smote_1$ps_estimates, model_dataset_smote_1$treatment)
+# perf_smote_1 <- performance(pred_smote_1,"tpr","fpr")
+# plot(perf_smote_1,colorize=TRUE)
+# auc_ROCR_smote_1 <- performance(pred_smote_1, measure = "auc")
+# auc_ROCR_smote_1 <- auc_ROCR_smote_1@y.values[[1]]
+# 
+# #Prep data to go into model
+# model_dataset_smote_2 <- model_dataset
+# model_dataset_smote_2$ps_estimates <- oversampled_ps_est_2[1:dim(model_dataset_smote_2$treatment)[1], ]
 
 #Obtain posterior results#####
 source("3_Model_estimation/BCF_function.R")
 
 #Cross-sectional model with 'simple'estimates for pi hat
 bcf_test <- BCF_estimation(model_dataset$outcomes, model_dataset$controls, model_dataset$moderators, model_dataset$treatment, model_dataset$ps_estimates)
-names(bcf_test)[1] <- "posterior results"
-names(bcf_test$`posterior results`) <- c("syBP", "BMI", "waist")
- 
+attributes(bcf_test$effect_moderators)$dimnames[[2]][[7]] <- "ps_estimates"
+colnames(bcf_test$effect_moderators) <- attributes(bcf_test$effect_moderators)$dimnames[[2]]
+
 #Difference model with 'simple' estimates for pi hat
 bcf_test2 <- BCF_estimation(model_dataset_2$outcomes, model_dataset_2$controls, model_dataset_2$moderators, model_dataset_2$treatment, model_dataset_2$ps_estimates)
-names(bcf_test2)[1] <- "posterior results"
-names(bcf_test2$`posterior results`) <- c("syBP", "BMI", "waist")
+
 
 #Cross-sectional model with SMOTE pi hat estimates
-bcf_test_smote <- BCF_estimation(model_dataset_smote_1$outcomes, model_dataset_smote_1$controls, model_dataset_smote_1$moderators, model_dataset_smote_1$treatment, model_dataset_smote_1$ps_estimates)
-names(bcf_test_smote)[1] <- "posterior results"
-names(bcf_test_smote$`posterior results`) <- c("syBP", "BMI", "waist")
+# bcf_test_smote <- BCF_estimation(model_dataset_smote_1$outcomes, model_dataset_smote_1$controls, model_dataset_smote_1$moderators, model_dataset_smote_1$treatment, model_dataset_smote_1$ps_estimates)
+# 
+# 
+# #Difference model with SMOTE pi hat estimates
+# bcf_test_smote2 <- BCF_estimation(model_dataset_smote_2$outcomes, model_dataset_smote_2$controls, model_dataset_smote_2$moderators, model_dataset_smote_2$treatment, model_dataset_smote_2$ps_estimates)
 
-#Difference model with SMOTE pi hat estimates
-bcf_test_smote2 <- BCF_estimation(model_dataset_smote_2$outcomes, model_dataset_smote_2$controls, model_dataset_smote_2$moderators, model_dataset_smote_2$treatment, model_dataset_smote_2$ps_estimates)
-names(bcf_test_smote2)[1] <- "posterior results"
-names(bcf_test_smote2$`posterior results`) <- c("syBP", "BMI", "waist")
 
 #####Evaluation of results#####
+source("4_Evaluation/model_evaluation.R")
+bcf_base_results <- evalpost(bcf_test, evaluation_methods = c("ATE", "Credibility interval", "CATEs"))
+bcf_long_results <- evalpost(bcf_test_2, evaluation_methods = c("ATE", "Credibility interval", "CATEs"))
+                             
+#Posterior exploration cross-sectional sample
+library(rpart)
 
-#Cross sectional model with SMOTE pi hat estimates
+#Systolic Blood pressure
+exploreset_sybp <- cbind(colMeans(bcf_test$`posterior_results syBP`$tau), bcf_test$effect_moderators)
+colnames(exploreset_sybp)[1] <- "tau"
+exploreset_sybp <- as.data.frame(exploreset_sybp)
+model <- rpart(tau ~., data = exploreset_sybp)
+par(xpd = NA) # otherwise on some devices the text is clipped
+plot(model)
+text(model, digits = 3)
 
+#BMI
+exploreset_BMI <- cbind(colMeans(bcf_test$`posterior_results BMI`$tau), bcf_test$effect_moderators)
+colnames(exploreset_BMI)[1] <- "tau"
+model <- rpart(tau ~., data = exploreset_BMI)
+par(xpd = NA) # otherwise on some devices the text is clipped
+plot(model)
+text(model, digits = 3)
 
-
-
+#Waist
+exploreset_waist <- cbind(colMeans(bcf_test$`posterior_results waist`$tau), bcf_test$effect_moderators)
+colnames(exploreset_waist)[1] <- "tau"
+model <- rpart(tau ~., data = exploreset_waist)
+par(xpd = NA) # otherwise on some devices the text is clipped
+plot(model)
+text(model, digits = 3)
 
 
 
