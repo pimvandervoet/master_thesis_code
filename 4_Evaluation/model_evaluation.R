@@ -66,9 +66,11 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
         evaluation_results[["CATEs"]][["sex"]][["syBP"]]  <- list("CATE syBP female" = CATE_syBP_female_te,
                                                                   "CATE syBP female plot" = ATE_waist_CI_plot,
                                                                   "CATE syBP female ltz" = CATE_syBP_female_ltz,
+                                                                  "CATE syBP female CI" =  CATE_syBP_female_CI,
                                                                   "CATE syBP male" = CATE_syBP_male_te,
                                                                   "CATE syBP male plot" = CATE_syBP_female_CI_plot,
-                                                                   "CATE syBP male ltz" = CATE_syBP_male_ltz
+                                                                   "CATE syBP male ltz" = CATE_syBP_male_ltz,
+                                                                  "CATE syBP male CI" =  CATE_syBP_male_CI
                                                                 )
         
         CATE_BMI_pd_female <- rowMeans(bcf_post$`posterior_results BMI`$tau[, which(bcf_post$effect_moderators[, "sex"] == 0)]) 
@@ -88,9 +90,13 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
         evaluation_results[["CATEs"]][["sex"]][["BMI"]]  <- list("CATE BMI female" = CATE_BMI_female_te,
                                                                   "CATE BMI female plot" = ATE_waist_CI_plot,
                                                                  "CATE BMI female ltz" = CATE_BMI_female_ltz,
-                                                                  "CATE BMI male" = CATE_BMI_male_te,
+                                                                 "CATE BMI female CI" =  CATE_BMI_female_CI,
+                                                                "CATE BMI male" = CATE_BMI_male_te,
                                                                   "CATE BMI male plot" = CATE_BMI_female_CI_plot,
-                                                                 "CATE BMI male ltz" = CATE_BMI_male_ltz)
+                                                                 "CATE BMI male ltz" = CATE_BMI_male_ltz,
+                                                                "CATE BMI male CI" =  CATE_BMI_male_CI
+        )
+        
         
         CATE_waist_pd_female <- rowMeans(bcf_post$`posterior_results waist`$tau[, which(bcf_post$effect_moderators[, "sex"] == 0)]) 
         CATE_waist_female_CI <- ci(CATE_waist_pd_female, method = "HDI")
@@ -109,9 +115,11 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
         evaluation_results[["CATEs"]][["sex"]][["waist"]]  <- list("CATE waist female" = CATE_waist_female_te,
                                                                   "CATE waist female plot" = ATE_waist_CI_plot,
                                                                   "CATE waist female ltz" = CATE_waist_female_ltz,
+                                                                  "CATE waist female CI" =  CATE_waist_female_CI,
                                                                   "CATE waist male" = CATE_waist_male_te,
                                                                   "CATE waist male plot" = CATE_waist_female_CI_plot,
-                                                                  "CATE waist male ltz" = CATE_waist_male_ltz)
+                                                                  "CATE waist male ltz" = CATE_waist_male_ltz,
+                                                                  "CATE waist male CI" =  CATE_waist_male_CI)
 
         
         #Wealth bin ####
@@ -181,10 +189,13 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
           listname <- paste("CATE syBP age ", ages)
           listname2 <- paste(listname, " plot")
           listname3 <- paste("ltz", ages)
+          listname4 <- paste("CI", ages)
           
           evaluation_results[["CATEs"]][["age"]][["syBP"]][[listname]]  <- CATE_syBP_age_te
           evaluation_results[["CATEs"]][["age"]][["syBP"]][[listname2]] <- CATE_syBP_age_CI_plot
           evaluation_results[["CATEs"]][["age"]][["syBP"]][[listname3]] <- CATE_syBP_age_ltz
+          evaluation_results[["CATEs"]][["age"]][["syBP"]][[listname4]] <- CATE_syBP_age_CI_plot
+          
           
           
           CATE_BMI_pd_age <- rowMeans(bcf_post$`posterior_results BMI`$tau[, which(bcf_post$effect_moderators[, "age"] >= ages & bcf_post$effect_moderators[, "age"] < (ages + 10)) ]) 
@@ -197,11 +208,15 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
           listname <- paste("CATE BMI age ", ages)
           listname2 <- paste(listname, " plot")
           listname3 <- paste("ltz", ages)
+          listname4 <- paste("CI", ages)
+          
           
           
           evaluation_results[["CATEs"]][["age"]][["BMI"]][[listname]]  <- CATE_BMI_age_te
           evaluation_results[["CATEs"]][["age"]][["BMI"]][[listname2]] <- CATE_BMI_age_CI_plot
           evaluation_results[["CATEs"]][["age"]][["BMI"]][[listname3]] <- CATE_BMI_age_ltz
+          evaluation_results[["CATEs"]][["age"]][["BMI"]][[listname4]] <- CATE_BMI_age_CI_plot
+          
           
           CATE_waist_pd_age <- rowMeans(bcf_post$`posterior_results waist`$tau[, which(bcf_post$effect_moderators[, "age"] >= ages & bcf_post$effect_moderators[, "age"] < (ages + 10)) ]) 
           CATE_waist_age_CI <- ci(CATE_waist_pd_age, method = "HDI")
@@ -213,11 +228,15 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
           listname <- paste("CATE waist age ", ages)
           listname2 <- paste(listname, " plot")
           listname3 <- paste("ltz", ages)
+          listname4 <- paste("CI", ages)
+          
           
           
           evaluation_results[["CATEs"]][["age"]][["waist"]][[listname]]  <- CATE_waist_age_te
           evaluation_results[["CATEs"]][["age"]][["waist"]][[listname2]] <- CATE_waist_age_CI_plot
           evaluation_results[["CATEs"]][["age"]][["waist"]][[listname3]] <- CATE_waist_age_ltz
+          evaluation_results[["CATEs"]][["age"]][["waist"]][[listname4]] <- CATE_waist_age_CI_plot
+          
         }
         
         #Race####
@@ -232,10 +251,14 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
           listname <- paste("CATE syBP race ", race_ind)
           listname2 <- paste(listname, " plot")
           listname3 <- paste("ltz", race_ind)
+          listname4 <- paste("CI", race_ind)
+          
           
           evaluation_results[["CATEs"]][["race"]][["syBP"]][[listname]]  <- CATE_syBP_race_te
           evaluation_results[["CATEs"]][["race"]][["syBP"]][[listname2]] <- CATE_syBP_race_CI_plot
           evaluation_results[["CATEs"]][["race"]][["syBP"]][[listname3]] <- CATE_syBP_race_ltz
+          evaluation_results[["CATEs"]][["race"]][["syBP"]][[listname4]] <- CATE_syBP_race_CI
+          
           
           
           CATE_BMI_pd_race <- rowMeans(bcf_post$`posterior_results BMI`$tau[, which(bcf_post$effect_moderators[, race_ind] == 1)]) 
@@ -248,11 +271,14 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
           listname <- paste("CATE BMI race ", race_ind)
           listname2 <- paste(listname, " plot")
           listname3 <- paste("ltz", race_ind)
+          listname4 <- paste("CI", race_ind)
           
           
           evaluation_results[["CATEs"]][["race"]][["BMI"]][[listname]]  <- CATE_BMI_race_te
           evaluation_results[["CATEs"]][["race"]][["BMI"]][[listname2]] <- CATE_BMI_race_CI_plot
           evaluation_results[["CATEs"]][["race"]][["BMI"]][[listname3]] <- CATE_BMI_race_ltz
+          evaluation_results[["CATEs"]][["race"]][["BMI"]][[listname4]] <- CATE_BMI_race_CI
+          
           
           
           CATE_waist_pd_race <- rowMeans(bcf_post$`posterior_results waist`$tau[, which(bcf_post$effect_moderators[, race_ind] == 1)]) 
@@ -265,11 +291,14 @@ evalpost <- function(bcf_post = NULL, evaluation_methods = c("ATE", "Credibility
           listname <- paste("CATE waist race ", race_ind)
           listname2 <- paste(listname, " plot")
           listname3 <- paste("ltz", race_ind)
+          listname4 <- paste("CI", race_ind)
           
           
           evaluation_results[["CATEs"]][["race"]][["waist"]][[listname]]  <- CATE_waist_race_te
           evaluation_results[["CATEs"]][["race"]][["waist"]][[listname2]] <- CATE_waist_race_CI_plot
           evaluation_results[["CATEs"]][["race"]][["waist"]][[listname3]] <- CATE_waist_race_ltz
+          evaluation_results[["CATEs"]][["race"]][["waist"]][[listname4]] <- CATE_waist_race_CI
+          
           
         }
         
