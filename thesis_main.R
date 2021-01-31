@@ -255,7 +255,7 @@ counts_2 <- c("white_tr" = sum(weightvector_2[intersect(which(data_seperated_2$m
 
 #Perform K-fold cross validation to do parameter tuning
 source("2_Propensity_estimation/cv_ps_est.R")
-#AUC_matrix <- cv_ps_est(data_seperated_1, k_fold = 10, k_par = c(4), m_par = c(50))
+AUC_matrix <- cv_ps_est(data_seperated_2, k_fold = 10, k_par = c(3), m_par = c(50))
 
 
 
@@ -286,8 +286,8 @@ simple_ps_est_2 <- ps_estimator(data_seperated_2$controls[,!names(data_seperated
                                take_means_draws = TRUE,
                                k_fold_cv = 1,
                                repeats = 1,
-                               k_parameter = 3,
-                               m_parameter = 100)
+                               k_parameter = 2,
+                               m_parameter = 50)
 
 pred_simple_2 <- prediction(simple_ps_est_2, data_seperated_2$treatment)
 perf_simple_2 <- performance(pred_simple_2,"tpr","fpr")
@@ -364,7 +364,7 @@ bcf_test2 <- BCF_estimation(model_dataset_2$outcomes, model_dataset_2$controls, 
 #####Evaluation of results#####
 source("4_Evaluation/model_evaluation.R")
 bcf_base_results <- evalpost(bcf_test, evaluation_methods = c("ATE", "Credibility interval", "CATEs"))
-bcf_long_results <- evalpost(bcf_test_2, evaluation_methods = c("ATE", "Credibility interval", "CATEs"))
+bcf_long_results <- evalpost(bcf_test2, evaluation_methods = c("ATE", "Credibility interval", "CATEs"))
                              
 #Posterior exploration cross-sectional sample
 library(rpart)
@@ -381,6 +381,7 @@ text(model, digits = 3)
 #BMI
 exploreset_BMI <- cbind(colMeans(bcf_test$`posterior_results BMI`$tau), bcf_test$effect_moderators)
 colnames(exploreset_BMI)[1] <- "tau"
+exploreset_BMI <- as.data.frame(exploreset_BMI)
 model <- rpart(tau ~., data = exploreset_BMI)
 par(xpd = NA) # otherwise on some devices the text is clipped
 plot(model)
@@ -389,6 +390,7 @@ text(model, digits = 3)
 #Waist
 exploreset_waist <- cbind(colMeans(bcf_test$`posterior_results waist`$tau), bcf_test$effect_moderators)
 colnames(exploreset_waist)[1] <- "tau"
+exploreset_waist <- as.data.frame(exploreset_waist)
 model <- rpart(tau ~., data = exploreset_waist)
 par(xpd = NA) # otherwise on some devices the text is clipped
 plot(model)
