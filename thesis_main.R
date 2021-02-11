@@ -43,6 +43,7 @@ controlvariables_1 <-
     "age",
     "moEducation",
     "education",
+    "expODAll",
     "mStat11",
     "mStat13",
     "prevRetStat",
@@ -190,25 +191,25 @@ treated_2 <- which(data_seperated_2$treatment == 1)
 non_treated_2 <- which(data_seperated_2$treatment == 0)
 weighted_means_2 <-  c("sex tr" = weighted.mean(data_seperated_2$moderators$sex[treated_2], weightvector_2[treated_2 ]),
                        "age tr" = weighted.mean(data_seperated_2$moderators$age[treated_2], weightvector_2[treated_2 ]),
-                       "syBP tr" = weighted.mean(data_seperated_2$outcomes$syBP_mean[treated_2 ], weightvector_2[treated_2 ]),
-                       "BMI tr"  = weighted.mean(data_seperated_2$outcomes$BMI[treated_2 ], weightvector_2[treated_2 ]),
-                       "waist tr" = weighted.mean(data_seperated_2$outcomes$waist[treated_2 ], weightvector_2[treated_2 ]),
+                       "syBP tr" = weighted.mean(data_seperated_2$outcomes$d_syBP_mean[treated_2 ], weightvector_2[treated_2 ]),
+                       "BMI tr"  = weighted.mean(data_seperated_2$outcomes$d_BMI[treated_2 ], weightvector_2[treated_2 ]),
+                       "waist tr" = weighted.mean(data_seperated_2$outcomes$d_waist[treated_2 ], weightvector_2[treated_2 ]),
                        "sex nt" = weighted.mean(data_seperated_2$moderators$sex[non_treated_2 ], weightvector_2[non_treated_2 ]),
                        "age nt" = weighted.mean(data_seperated_2$moderators$age[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                       "syBP nt" = weighted.mean(data_seperated_2$outcomes$syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                       "BMI nt"  = weighted.mean(data_seperated_2$outcomes$BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                       "waist nt" = weighted.mean(data_seperated_2$outcomes$waist[non_treated_2 ], weightvector_2[non_treated_2 ])
+                       "syBP nt" = weighted.mean(data_seperated_2$outcomes$d_syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                       "BMI nt"  = weighted.mean(data_seperated_2$outcomes$d_BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                       "waist nt" = weighted.mean(data_seperated_2$outcomes$d_waist[non_treated_2 ], weightvector_2[non_treated_2 ])
 )
 weighted_sd_2 <-  c("sex tr" = weighted.sd(data_seperated_2$moderators$sex[treated_2 ], weightvector_2[treated_2 ]),
                     "age tr" = weighted.sd(data_seperated_2$moderators$age[treated_2 ], weightvector_2[treated_2 ]),
-                    "syBP tr" = weighted.sd(data_seperated_2$outcomes$syBP_mean[treated_2 ], weightvector_2[treated_2 ]),
-                    "BMI tr"  = weighted.sd(data_seperated_2$outcomes$BMI[treated_2 ], weightvector_2[treated_2 ]),
-                    "waist tr" = weighted.sd(data_seperated_2$outcomes$waist[treated_2 ], weightvector_2[treated_2 ]),
+                    "syBP tr" = weighted.sd(data_seperated_2$outcomes$d_syBP_mean[treated_2 ], weightvector_2[treated_2 ]),
+                    "BMI tr"  = weighted.sd(data_seperated_2$outcomes$d_BMI[treated_2 ], weightvector_2[treated_2 ]),
+                    "waist tr" = weighted.sd(data_seperated_2$outcomes$d_waist[treated_2 ], weightvector_2[treated_2 ]),
                     "sex nt" = weighted.sd(data_seperated_2$moderators$sex[non_treated_2 ], weightvector_2[non_treated_2 ]),
                     "age nt" = weighted.sd(data_seperated_2$moderators$age[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                    "syBP nt" = weighted.sd(data_seperated_2$outcomes$syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                    "BMI nt"  = weighted.sd(data_seperated_2$outcomes$BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                    "waist nt" = weighted.sd(data_seperated_2$outcomes$waist[non_treated_2 ], weightvector_2[non_treated_2 ])
+                    "syBP nt" = weighted.sd(data_seperated_2$outcomes$d_syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                    "BMI nt"  = weighted.sd(data_seperated_2$outcomes$d_BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                    "waist nt" = weighted.sd(data_seperated_2$outcomes$d_waist[non_treated_2 ], weightvector_2[non_treated_2 ])
 )
 
 
@@ -254,8 +255,8 @@ counts_2 <- c("white_tr" = sum(weightvector_2[intersect(which(data_seperated_2$m
 ######Propensity score estimates#####
 
 #Perform K-fold cross validation to do parameter tuning
-source("2_Propensity_estimation/cv_ps_est.R")
-AUC_matrix <- cv_ps_est(data_seperated_2, k_fold = 10, k_par = c(3), m_par = c(50))
+#source("2_Propensity_estimation/cv_ps_est.R")
+#AUC_matrix <- cv_ps_est(data_seperated_1, k_fold = 10, k_par = c(2), m_par = c(400))
 
 
 
@@ -263,15 +264,17 @@ AUC_matrix <- cv_ps_est(data_seperated_2, k_fold = 10, k_par = c(3), m_par = c(5
 source("2_Propensity_estimation/propensity_score_estimation.R")
 library(ROCR)
 
+#Convergence is checked inside ps_estimator function manuallly
 simple_ps_est <- ps_estimator(data_seperated_1$controls[,!names(data_seperated_1$controls) %in% c("sampleWeight")],
                               data_seperated_1$treatment,
                               samples = 1000,
                               technique = "BARTMACHINE",
-                              take_means_draws = TRUE,
-                              k_fold_cv = 10,
+                              take_means_draws = FALSE,
+                              k_fold_cv = 1,
                               repeats = 1,
                               k_parameter = 3,
-                              m_parameter = 100)
+                              m_parameter = 50
+                              )
 
 pred_simple <- prediction(simple_ps_est, data_seperated_1$treatment)
 perf_simple <- performance(pred_simple,"tpr","fpr")
@@ -286,7 +289,7 @@ simple_ps_est_2 <- ps_estimator(data_seperated_2$controls[,!names(data_seperated
                                take_means_draws = TRUE,
                                k_fold_cv = 1,
                                repeats = 1,
-                               k_parameter = 2,
+                               k_parameter = 3,
                                m_parameter = 50)
 
 pred_simple_2 <- prediction(simple_ps_est_2, data_seperated_2$treatment)
@@ -299,7 +302,7 @@ source("3_Model_estimation/make_model_matrix_1.R")
 model_dataset <- make_model_matrix_1(data_seperated_1, simple_ps_est) 
 model_dataset_2 <- make_model_matrix_1(data_seperated_2, simple_ps_est_2) 
 
-# library(imbalance)
+#library(imbalance)
 # os_input_1 <- as.data.frame(cbind(model_dataset$controls, model_dataset$treatment))
 # oversample_SMOTE_1 <- oversample(os_input_1[,!names(os_input_1) %in% c("sampleWeight")], 0.8, "SMOTE", filtering = FALSE, classAttr =  "expRDAll")
 # treatment_tib <- tibble(oversample_SMOTE_1$expRDAll)
@@ -321,37 +324,53 @@ model_dataset_2 <- make_model_matrix_1(data_seperated_2, simple_ps_est_2)
 #                               repeats = 1)
 # 
 # oversampled_ps_est_2 <- ps_estimator(oversample_SMOTE_2[, !names(oversample_SMOTE_2) %in% c("expRDAll")],
-#                                 treatment_tib_2,
-#                                 samples = 1000,
-#                                 technique = "BARTMACHINE",
-#                                 take_means_draws = TRUE,
-#                                 k_fold_cv = 1,
-#                                 repeats = 1)
-# 
-# model_dataset_smote_1 <- model_dataset
-# model_dataset_smote_1$ps_estimates <- oversampled_ps_est[1:dim(model_dataset_smote_1$treatment)[1], ]
-# 
-# pred_smote_1 <- prediction(model_dataset_smote_1$ps_estimates, model_dataset_smote_1$treatment)
-# perf_smote_1 <- performance(pred_smote_1,"tpr","fpr")
-# plot(perf_smote_1,colorize=TRUE)
-# auc_ROCR_smote_1 <- performance(pred_smote_1, measure = "auc")
-# auc_ROCR_smote_1 <- auc_ROCR_smote_1@y.values[[1]]
-# 
+#                                  treatment_tib_2,
+#                                  samples = 1000,
+#                                  technique = "BARTMACHINE",
+#                                  take_means_draws = TRUE,
+#                                  k_fold_cv = 1,
+#                                  repeats = 1,
+#                                  k_parameter = 3,
+#                                  m_parameter = 200)
+#  
+# # model_dataset_smote_1 <- model_dataset
+# # model_dataset_smote_1$ps_estimates <- oversampled_ps_est[1:dim(model_dataset_smote_1$treatment)[1], ]
+#  
 # #Prep data to go into model
-# model_dataset_smote_2 <- model_dataset
-# model_dataset_smote_2$ps_estimates <- oversampled_ps_est_2[1:dim(model_dataset_smote_2$treatment)[1], ]
-
+#  model_dataset_smote_2 <- model_dataset
+#  model_dataset_smote_2$ps_estimates <- oversampled_ps_est_2[1:dim(model_dataset_smote_2$treatment)[1], ]
+# 
+#  #Plot performance
+#  pred_smote_2 <- prediction(model_dataset_smote_2$ps_estimates, model_dataset_smote_2$treatment)
+#  perf_smote_2 <- performance(pred_smote_2,"tpr","fpr")
+#  plot(perf_smote_2,colorize=TRUE)
+#  auc_ROCR_smote_2 <- performance(pred_smote_2, measure = "auc")
+#  auc_ROCR_smote_2 <- auc_ROCR_smote_2@y.values[[1]]
+ 
+ 
 #Obtain posterior results#####
 source("3_Model_estimation/BCF_function.R")
 
 #Cross-sectional model with 'simple'estimates for pi hat
-bcf_test <- BCF_estimation(model_dataset$outcomes, model_dataset$controls, model_dataset$moderators, model_dataset$treatment, model_dataset$ps_estimates)
+bcf_test <- BCF_estimation(model_dataset$outcomes, model_dataset$controls, model_dataset$moderators, model_dataset$treatment, model_dataset$ps_estimates, no_draws = 10000, burnin = 1000)
 attributes(bcf_test$effect_moderators)$dimnames[[2]][[7]] <- "ps_estimates"
 colnames(bcf_test$effect_moderators) <- attributes(bcf_test$effect_moderators)$dimnames[[2]]
 
-#Difference model with 'simple' estimates for pi hat
-bcf_test2 <- BCF_estimation(model_dataset_2$outcomes, model_dataset_2$controls, model_dataset_2$moderators, model_dataset_2$treatment, model_dataset_2$ps_estimates)
+library(coda)
+raterfy_syBP <- coda::raftery.diag(coda::as.mcmc(bcf_test$`posterior_results syBP`$tau))
+raterfy_BMI <- coda::raftery.diag(coda::as.mcmc(bcf_test$`posterior_results BMI`$tau))
+raterfy_waist <- coda::raftery.diag(coda::as.mcmc(bcf_test$`posterior_results waist`$tau))
 
+
+#Difference model with 'simple' estimates for pi hat
+bcf_test2 <- BCF_estimation(model_dataset_2$outcomes, model_dataset_2$controls, model_dataset_2$moderators, model_dataset_2$treatment, model_dataset_2$ps_estimates, no_draws = 10000, burnin = 1000)
+attributes(bcf_test2$effect_moderators)$dimnames[[2]][[7]] <- "ps_estimates"
+colnames(bcf_test2$effect_moderators) <- attributes(bcf_test2$effect_moderators)$dimnames[[2]]
+
+library(coda)
+raterfy_syBP2 <- coda::raftery.diag(coda::as.mcmc(bcf_test2$`posterior_results syBP`$tau))
+raterfy_BMI2 <- coda::raftery.diag(coda::as.mcmc(bcf_test2$`posterior_results BMI`$tau))
+raterfy_waist2 <- coda::raftery.diag(coda::as.mcmc(bcf_test2$`posterior_results waist`$tau))
 
 #Cross-sectional model with SMOTE pi hat estimates
 # bcf_test_smote <- BCF_estimation(model_dataset_smote_1$outcomes, model_dataset_smote_1$controls, model_dataset_smote_1$moderators, model_dataset_smote_1$treatment, model_dataset_smote_1$ps_estimates)
@@ -397,5 +416,106 @@ plot(model)
 text(model, digits = 3)
 
 
+#Posterior exploration longitudinal sample
 
-#Estimate posterior treatment function including sensitivity analysis
+
+#Systolic Blood pressure
+exploreset_sybp <- cbind(colMeans(bcf_test2$`posterior_results syBP`$tau), bcf_test2$effect_moderators)
+colnames(exploreset_sybp)[1] <- "tau"
+exploreset_sybp <- as.data.frame(exploreset_sybp)
+model <- rpart(tau ~., data = exploreset_sybp)
+par(xpd = NA) # otherwise on some devices the text is clipped
+plot(model)
+text(model, digits = 3)
+
+#BMI
+exploreset_BMI <- cbind(colMeans(bcf_test2$`posterior_results BMI`$tau), bcf_test2$effect_moderators)
+colnames(exploreset_BMI)[1] <- "tau"
+exploreset_BMI <- as.data.frame(exploreset_BMI)
+model <- rpart(tau ~., data = exploreset_BMI)
+par(xpd = NA) # otherwise on some devices the text is clipped
+plot(model)
+text(model, digits = 3)
+
+#Waist
+exploreset_waist <- cbind(colMeans(bcf_test2$`posterior_results waist`$tau), bcf_test2$effect_moderators)
+colnames(exploreset_waist)[1] <- "tau"
+exploreset_waist <- as.data.frame(exploreset_waist)
+model <- rpart(tau ~., data = exploreset_waist)
+par(xpd = NA) # otherwise on some devices the text is clipped
+plot(model)
+text(model, digits = 3)
+
+#Save results
+save.image("unweighted_analysis_results.RData")
+
+#### Weighted analysis #### ---- BEFORE RUNNING NEED TO RESTART R AND SET NO OF PARRALEL LOOPS IN PS_ESTIMATOR #####
+wanalysis_data_seperated <- data_seperated_1
+rm(list=setdiff(ls(), c("wanalysis_data_seperated", lsf.str())))
+#Scale sample weights to sum of weights
+totalweights <- sum(wanalysis_data_seperated$controls$sampleWeight)
+wanalysis_data_seperated$controls <- mutate(wanalysis_data_seperated$controls, sampleWeight = sampleWeight/totalweights)
+
+#To save in loop
+set.seed(30121997)
+loopsize <- 10
+drawsPL <- 1000
+PRS_results_syBP <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
+PRS_results_BMI <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
+PRS_results_waist <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
+
+library(foreach)
+library(parallel)
+library(doParallel)
+library(doRNG)
+#Actual loop
+
+cl <- parallel::makeCluster(5)
+doParallel::registerDoParallel(cl)
+doRNG::registerDoRNG(30121997)
+init <- Sys.time()
+w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven", "bartMachine", "bcf"),  .combine=c, .multicombine=TRUE,
+                .init=list()) %dopar% {
+  #Generate PRS
+  PRS <- list()
+  individuals_shuffle <- sample(nrow(wanalysis_data_seperated$controls), size = nrow(wanalysis_data_seperated$controls), replace = TRUE, prob = wanalysis_data_seperated$sampleWeight )
+  PRS$controls <- wanalysis_data_seperated$controls[individuals_shuffle, ]
+  PRS$moderators <- wanalysis_data_seperated$moderators[individuals_shuffle, ]
+  PRS$outcomes <- wanalysis_data_seperated$outcomes[individuals_shuffle, ]
+  PRS$treatment <- wanalysis_data_seperated$treatment[individuals_shuffle, ]
+   
+  #Estimate propensity scores with pre-tuned parameters - fiox nr of cores used before running!!
+  loop_ps_est <- ps_estimator(PRS$controls[,!names(PRS$controls) %in% c("sampleWeight")],
+                               PRS$treatment,
+                               samples = 500, #May need to check visually whether this is enough
+                               technique = "BARTMACHINE",
+                               take_means_draws = TRUE,
+                               k_fold_cv = 1,
+                               repeats = 1,
+                               k_parameter = 3,
+                               m_parameter = 50
+   )
+
+  loop_model_dataset <- make_model_matrix_1(PRS, loop_ps_est)
+
+
+  #Estimate BCF model - make sure to adapt nr of draws before doing this in BCF function
+  bcf_loop <- BCF_estimation(loop_model_dataset$outcomes, loop_model_dataset$controls, loop_model_dataset$moderators, loop_model_dataset$treatment, loop_model_dataset$ps_estimates, no_draws = drawsPL , burnin = 200 )
+
+  #Save relevant results, throw away all other data
+  list("PRS_results_syBP" <- t(bcf_loop$`posterior_results syBP`$tau),
+  "PRS_results_BMI" <- t(bcf_loop$`posterior_results BMI`$tau),
+  "PRS_results_waist" <- t(bcf_loop$`posterior_results waist`$tau), PRS_count)
+  
+}
+
+Sys.time() - init
+stopCluster(cl)
+
+#Add the results
+for(n_res in 1:loopsize){
+  PRS_results_syBP[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*4 + 1]]
+  PRS_results_BMI[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*4 + 2]]
+  PRS_results_waist[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*4 + 3]]
+}
+#Do analysis on results  - add moderator variables then put in functions we have already
