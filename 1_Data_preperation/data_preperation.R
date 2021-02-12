@@ -276,7 +276,7 @@ data_formatter <- function(non_formatted_data = NA) {
     )) {
       #Select the variable that needs to be changed
       variable <- formatted_data[[i]]
-      variable <- as_factor(variable)
+      variable <- forcats::as_factor(variable)
       
       if (i %in% c("jobStat.A1",
                    "jobStat.A2",
@@ -353,7 +353,7 @@ data_formatter <- function(non_formatted_data = NA) {
       #Select the variable that needs to be changed (education already has labels on it, ordered automatically - low factor = low education)
       variable <- formatted_data[[i]]
       variable <-
-        as_factor(variable, levels = "default", ordered = TRUE)
+        haven::as_factor(variable, levels = "default", ordered = TRUE)
       
       #Put formatted variable in formatted data
       formatted_data[[i]] <- variable
@@ -720,10 +720,68 @@ define_racial_discrimination <-
           0
           )))
         
+        data_rd_inc <-
+          mutate(data_rd_inc, expOtherDisc = ifelse(is.na(rDisc1), NA, ifelse((
+            rDisc1 != "1.your ancestry or national origin" &
+              rDisc1 != "3.your race" |
+              (
+                rDisc2 != "1.your ancestry or national origin" & !is.na(rDisc2)
+              ) &
+              (rDisc2 != "3.your race" & !is.na(rDisc2)) |
+              (
+                rDisc3 != "1.your ancestry or national origin" & !is.na(rDisc3)
+              ) &
+              (rDisc3 != "3.your race" & !is.na(rDisc3)) &
+              (
+                rDisc4 != "1.your ancestry or national origin" & !is.na(rDisc4)
+              ) &
+              (rDisc4 != "3.your race" & !is.na(rDisc4)) |
+              (
+                rDisc5 != "1.your ancestry or national origin" & !is.na(rDisc5)
+              ) &
+              (rDisc5 != "3.your race" & !is.na(rDisc5)) |
+              (
+                rDisc6 != "1.your ancestry or national origin" & !is.na(rDisc6)
+              ) &
+              (rDisc6 != "3.your race" & !is.na(rDisc6)) |
+              (
+                rDisc7 != "1.your ancestry or national origin" & !is.na(rDisc7)
+              ) &
+              (rDisc7 != "3.your race" & !is.na(rDisc7)) |
+              (
+                rDisc8 != "1.your ancestry or national origin" & !is.na(rDisc8)
+              ) &
+              (rDisc8 != "3.your race" & !is.na(rDisc8)) |
+              (
+                rDisc9 != "1.your ancestry or national origin" & !is.na(rDisc9)
+              ) &
+              (rDisc9 != "3.your race" & !is.na(rDisc9)) |
+              (
+                rDisc10 != "1.your ancestry or national origin" & !is.na(rDisc10)
+              ) &
+              (rDisc10 != "3.your race" & !is.na(rDisc10))
+          )
+          ,
+          1,
+          0
+          )))
+        
         #Find individuals that report experiences of racial discirmination overall (fill NA's of expRacialDisc with information from expDisc)
         data_rd_inc <-
           mutate(data_rd_inc, expRDAll = ifelse((
             expRacialDisc == 1 &
+              !is.na(expRacialDisc) &
+              expDisc == 1 &
+              !is.na(expDisc)
+          ) ,
+          1,
+          ifelse(!is.na(expDisc), 0, NA)
+          ))
+        
+        #Find individuals that report experiences of other kinds of  discirmination overall (fill NA's of expRacialDisc with information from expDisc)
+        data_rd_inc <-
+          mutate(data_rd_inc, expODAll = ifelse((
+            expOtherDisc == 1 &
               !is.na(expRacialDisc) &
               expDisc == 1 &
               !is.na(expDisc)

@@ -21,7 +21,8 @@ ps_estimator <-
            repeats = 1,
            k_parameter = 2,
            m_parameter = 50,
-           smote_kfold = FALSE
+           smote_kfold = FALSE,
+           convergence_check = FALSE
            ) {
     #Preprocessing steps if needed
     set.seed(30121997)
@@ -132,7 +133,7 @@ ps_estimator <-
         } else if (technique == "BARTMACHINE") {
           options(java.parameters = "-Xmx10g")
           library(bartMachine)
-          set_bart_machine_num_cores(5)
+          set_bart_machine_num_cores(1)
           #Check if train treatment is binary
           if (typeof(train_treatment) == "double") {
             train_treatment <- as_factor(train_treatment)
@@ -226,6 +227,8 @@ ps_estimator <-
             #   k_folds <- 5,
             #   verbose = TRUE)
             model_execution <- model_execution_obj$p_hat_train
+           # convergence_plots <- plot_convergence_diagnostics(model_execution_obj)
+           
           }
         }
         
@@ -261,6 +264,9 @@ ps_estimator <-
       return(model_execution_obj)
     }
     
+    #if(convergence_check == TRUE){
+   #   return(convergence_plots)
+   # }
   }
 
 #' ps_analysis

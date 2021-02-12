@@ -13,7 +13,7 @@
 #' @param ps_estimate_inclusion ... setting for where to include propensity scores, default = "both", can be "control" or "moderatore" or "none" if the estimates shouldn't be includedd both in mu and tau 
 #'
 #' 
-BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, errordistribution = "normal", sensitivity_parameters = "null", ps_estimate_inclusion = "both"){
+BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, errordistribution = "normal", sensitivity_parameters = "null", ps_estimate_inclusion = "both", no_draws = 10000, burnin = 2000){
   library(bcf)
   library(dbarts)
   
@@ -33,8 +33,8 @@ BCF_estimation <- function(outcome, cvars, mvars, treatment,  ps_estimates, erro
     x_control = cvars,
     x_moderate = mvars,
     pihat = ps_estimates,
-    nburn = 2000L,
-    nsim = 10000L,
+    nburn = burnin,
+    nsim = no_draws,
     nthin = 3L,
     update_interval = 200L,
     #Prior specification and nr of trees etc. according to specification of Hahn, Murray, Carvalho 2020
