@@ -418,7 +418,6 @@ text(model, digits = 3)
 
 #Posterior exploration longitudinal sample
 
-
 #Systolic Blood pressure
 exploreset_sybp <- cbind(colMeans(bcf_test2$`posterior_results syBP`$tau), bcf_test2$effect_moderators)
 colnames(exploreset_sybp)[1] <- "tau"
@@ -450,6 +449,7 @@ text(model, digits = 3)
 save.image("unweighted_analysis_results.RData")
 
 #### Weighted analysis #### ---- BEFORE RUNNING NEED TO RESTART R AND SET NO OF PARRALEL LOOPS IN PS_ESTIMATOR #####
+library(dplyr)
 wanalysis_data_seperated <- data_seperated_1
 rm(list=setdiff(ls(), c("wanalysis_data_seperated", lsf.str())))
 #Scale sample weights to sum of weights
@@ -459,11 +459,13 @@ wanalysis_data_seperated$controls <- mutate(wanalysis_data_seperated$controls, s
 #To save in loop
 set.seed(30121997)
 loopsize <- 10
-drawsPL <- 1000
+drawsPL <- 100
 PRS_results_syBP <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
 PRS_results_BMI <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
 PRS_results_waist <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
-
+individual_matrix <-  matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize)
+ps_estimates <-  matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize)
+  
 library(foreach)
 library(parallel)
 library(doParallel)
@@ -503,9 +505,15 @@ w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven",
   bcf_loop <- BCF_estimation(loop_model_dataset$outcomes, loop_model_dataset$controls, loop_model_dataset$moderators, loop_model_dataset$treatment, loop_model_dataset$ps_estimates, no_draws = drawsPL , burnin = 200 )
 
   #Save relevant results, throw away all other data
-  list("PRS_results_syBP" <- t(bcf_loop$`posterior_results syBP`$tau),
+  return(list("PRS_results_syBP" <- t(bcf_loop$`posterior_results syBP`$tau),
   "PRS_results_BMI" <- t(bcf_loop$`posterior_results BMI`$tau),
-  "PRS_results_waist" <- t(bcf_loop$`posterior_results waist`$tau), PRS_count)
+  "PRS_results_waist" <- t(bcf_loop$`posterior_results waist`$tau), 
+  individuals_shuffle, 
+  loop_ps_est,
+  PRS_count))
+  
+  remove(c(individuals_shuffle, PRS, loop_ps_est, loop_model_dataset, bcf_loop))
+  
   
 }
 
@@ -514,8 +522,19 @@ stopCluster(cl)
 
 #Add the results
 for(n_res in 1:loopsize){
-  PRS_results_syBP[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*4 + 1]]
-  PRS_results_BMI[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*4 + 2]]
-  PRS_results_waist[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*4 + 3]]
+  PRS_results_syBP[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*6 + 1]]
+  PRS_results_BMI[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*6 + 2]]
+  PRS_results_waist[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*6 + 3]]
+  individual_matrix[, n_res] <- w_an[[(n_res-1)*6 + 4]]
+  ps_estimates[, n_res] <- w_an[[(n_res-1)* 6 + 5]]
 }
-#Do analysis on results  - add moderator variables then put in functions we have already
+
+evalpost_weighted(PRS_results_syBP, individual_matrix, wanalysis_data_seperated$moderators, ps_estimates)
+
+remove(w_an)
+
+#Obtain CATEs and ITEs
+
+
+
+
