@@ -387,34 +387,28 @@ bcf_long_results <- evalpost(bcf_test2, evaluation_methods = c("ATE", "Credibili
                              
 #Posterior exploration cross-sectional sample
 library(rpart)
+library(rattle)
 
 #Systolic Blood pressure
 exploreset_sybp <- cbind(colMeans(bcf_test$`posterior_results syBP`$tau), bcf_test$effect_moderators)
 colnames(exploreset_sybp)[1] <- "tau"
 exploreset_sybp <- as.data.frame(exploreset_sybp)
 model <- rpart(tau ~., data = exploreset_sybp)
-par(xpd = NA) # otherwise on some devices the text is clipped
-plot(model)
-text(model, digits = 3)
+fancyRpartPlot(model, "", "", palettes = "RdBu")
 
 #BMI
 exploreset_BMI <- cbind(colMeans(bcf_test$`posterior_results BMI`$tau), bcf_test$effect_moderators)
 colnames(exploreset_BMI)[1] <- "tau"
 exploreset_BMI <- as.data.frame(exploreset_BMI)
 model <- rpart(tau ~., data = exploreset_BMI)
-par(xpd = NA) # otherwise on some devices the text is clipped
-plot(model)
-text(model, digits = 3)
+fancyRpartPlot(model, "", "", palettes = "RdBu")
 
 #Waist
 exploreset_waist <- cbind(colMeans(bcf_test$`posterior_results waist`$tau), bcf_test$effect_moderators)
 colnames(exploreset_waist)[1] <- "tau"
 exploreset_waist <- as.data.frame(exploreset_waist)
 model <- rpart(tau ~., data = exploreset_waist)
-par(xpd = NA) # otherwise on some devices the text is clipped
-plot(model)
-text(model, digits = 3)
-
+fancyRpartPlot(model, "", "", palettes = "RdBu")
 
 #Posterior exploration longitudinal sample
 
@@ -423,43 +417,40 @@ exploreset_sybp <- cbind(colMeans(bcf_test2$`posterior_results syBP`$tau), bcf_t
 colnames(exploreset_sybp)[1] <- "tau"
 exploreset_sybp <- as.data.frame(exploreset_sybp)
 model <- rpart(tau ~., data = exploreset_sybp)
-par(xpd = NA) # otherwise on some devices the text is clipped
-plot(model)
-text(model, digits = 3)
+fancyRpartPlot(model, "", "", palettes = "RdBu")
 
 #BMI
 exploreset_BMI <- cbind(colMeans(bcf_test2$`posterior_results BMI`$tau), bcf_test2$effect_moderators)
 colnames(exploreset_BMI)[1] <- "tau"
 exploreset_BMI <- as.data.frame(exploreset_BMI)
 model <- rpart(tau ~., data = exploreset_BMI)
-par(xpd = NA) # otherwise on some devices the text is clipped
-plot(model)
-text(model, digits = 3)
+fancyRpartPlot(model, "", "", palettes = "RdBu")
 
 #Waist
 exploreset_waist <- cbind(colMeans(bcf_test2$`posterior_results waist`$tau), bcf_test2$effect_moderators)
 colnames(exploreset_waist)[1] <- "tau"
 exploreset_waist <- as.data.frame(exploreset_waist)
 model <- rpart(tau ~., data = exploreset_waist)
-par(xpd = NA) # otherwise on some devices the text is clipped
-plot(model)
-text(model, digits = 3)
+fancyRpartPlot(model, "", "", palettes = "RdBu")
 
 #Save results
 save.image("unweighted_analysis_results.RData")
 
 #### Weighted analysis #### ---- BEFORE RUNNING NEED TO RESTART R AND SET NO OF PARRALEL LOOPS IN PS_ESTIMATOR #####
+#Code below is runned in chuncks of 100 (with the exception of the first run which contained 200 iterations) first for the cross sectional dataset and then for the longitudinal dataset
+#Seeds were manually changed each iterations. Starting with both seeds at 30121997 for the first run, then 13022021 to 31022021 for the other 18. 
+
 library(dplyr)
-wanalysis_data_seperated <- data_seperated_1
+wanalysis_data_seperated <- data_seperated_2
 rm(list=setdiff(ls(), c("wanalysis_data_seperated", lsf.str())))
 #Scale sample weights to sum of weights
 totalweights <- sum(wanalysis_data_seperated$controls$sampleWeight)
 wanalysis_data_seperated$controls <- mutate(wanalysis_data_seperated$controls, sampleWeight = sampleWeight/totalweights)
 
 #To save in loop
-set.seed(30121997)
-loopsize <- 10
-drawsPL <- 100
+set.seed(29022021)
+loopsize <- 100
+drawsPL <- 1000
 PRS_results_syBP <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
 PRS_results_BMI <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
 PRS_results_waist <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
@@ -472,9 +463,9 @@ library(doParallel)
 library(doRNG)
 #Actual loop
 
-cl <- parallel::makeCluster(5)
+cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
-doRNG::registerDoRNG(30121997)
+doRNG::registerDoRNG(29022021)
 init <- Sys.time()
 w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven", "bartMachine", "bcf"),  .combine=c, .multicombine=TRUE,
                 .init=list()) %dopar% {
@@ -519,6 +510,8 @@ w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven",
 
 Sys.time() - init
 stopCluster(cl)
+
+save(w_an, file = "run_8_long_sample.RData")
 
 #Add the results
 for(n_res in 1:loopsize){
