@@ -441,22 +441,17 @@ save.image("unweighted_analysis_results.RData")
 #Seeds were manually changed each iterations. Starting with both seeds at 30121997 for the first run, then 13022021 to 31022021 for the other 18. 
 
 library(dplyr)
-wanalysis_data_seperated <- data_seperated_2
+wanalysis_data_seperated <- data_seperated_1
 rm(list=setdiff(ls(), c("wanalysis_data_seperated", lsf.str())))
 #Scale sample weights to sum of weights
 totalweights <- sum(wanalysis_data_seperated$controls$sampleWeight)
 wanalysis_data_seperated$controls <- mutate(wanalysis_data_seperated$controls, sampleWeight = sampleWeight/totalweights)
 
 #To save in loop
-set.seed(29022021)
+set.seed(31022021)
 loopsize <- 100
 drawsPL <- 1000
-PRS_results_syBP <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
-PRS_results_BMI <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
-PRS_results_waist <- matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize * drawsPL)
-individual_matrix <-  matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize)
-ps_estimates <-  matrix(NA, dim(wanalysis_data_seperated$controls)[1], loopsize)
-  
+
 library(foreach)
 library(parallel)
 library(doParallel)
@@ -465,7 +460,7 @@ library(doRNG)
 
 cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
-doRNG::registerDoRNG(29022021)
+doRNG::registerDoRNG(31022021)
 init <- Sys.time()
 w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven", "bartMachine", "bcf"),  .combine=c, .multicombine=TRUE,
                 .init=list()) %dopar% {
@@ -477,7 +472,7 @@ w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven",
   PRS$outcomes <- wanalysis_data_seperated$outcomes[individuals_shuffle, ]
   PRS$treatment <- wanalysis_data_seperated$treatment[individuals_shuffle, ]
    
-  #Estimate propensity scores with pre-tuned parameters - fiox nr of cores used before running!!
+  #Estimate propensity scores with pre-tuned parameters - fix nr of cores used before running!!
   loop_ps_est <- ps_estimator(PRS$controls[,!names(PRS$controls) %in% c("sampleWeight")],
                                PRS$treatment,
                                samples = 500, #May need to check visually whether this is enough
@@ -511,22 +506,17 @@ w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven",
 Sys.time() - init
 stopCluster(cl)
 
-save(w_an, file = "run_8_long_sample.RData")
-
-#Add the results
-for(n_res in 1:loopsize){
-  PRS_results_syBP[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*6 + 1]]
-  PRS_results_BMI[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*6 + 2]]
-  PRS_results_waist[, ((n_res - 1) * drawsPL  + 1):(n_res * drawsPL)] <- w_an[[(n_res-1)*6 + 3]]
-  individual_matrix[, n_res] <- w_an[[(n_res-1)*6 + 4]]
-  ps_estimates[, n_res] <- w_an[[(n_res-1)* 6 + 5]]
-}
-
-evalpost_weighted(PRS_results_syBP, individual_matrix, wanalysis_data_seperated$moderators, ps_estimates)
+save(w_an, file = "run_10_long_sample.RData")
 
 remove(w_an)
+#Proceed only if gathered all runs
 
-#Obtain CATEs and ITEs
+#Analyze CATEs and ITEs#####
+source("4_Evaluation/weighted_model_evaluation.R")
+
+#Obtain CATE and ITE posterior draws
+w_an_eval_prep(loopsize, drawsPL, iterations_used = 10, "cross")
+w_an_eval_prep(loopsize, drawsPL, iterations_used = 10, "long")
 
 
 
