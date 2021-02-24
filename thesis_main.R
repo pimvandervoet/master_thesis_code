@@ -440,73 +440,73 @@ save.image("unweighted_analysis_results.RData")
 #Code below is runned in chuncks of 100 (with the exception of the first run which contained 200 iterations) first for the cross sectional dataset and then for the longitudinal dataset
 #Seeds were manually changed each iterations. Starting with both seeds at 30121997 for the first run, then 13022021 to 31022021 for the other 18. 
 
-library(dplyr)
-wanalysis_data_seperated <- data_seperated_1
-rm(list=setdiff(ls(), c("wanalysis_data_seperated", lsf.str())))
-#Scale sample weights to sum of weights
-totalweights <- sum(wanalysis_data_seperated$controls$sampleWeight)
-wanalysis_data_seperated$controls <- mutate(wanalysis_data_seperated$controls, sampleWeight = sampleWeight/totalweights)
-
-#To save in loop
-set.seed(31022021)
-loopsize <- 100
-drawsPL <- 1000
-
-library(foreach)
-library(parallel)
-library(doParallel)
-library(doRNG)
-#Actual loop
-
-cl <- parallel::makeCluster(4)
-doParallel::registerDoParallel(cl)
-doRNG::registerDoRNG(31022021)
-init <- Sys.time()
-w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven", "bartMachine", "bcf"),  .combine=c, .multicombine=TRUE,
-                .init=list()) %dopar% {
-  #Generate PRS
-  PRS <- list()
-  individuals_shuffle <- sample(nrow(wanalysis_data_seperated$controls), size = nrow(wanalysis_data_seperated$controls), replace = TRUE, prob = wanalysis_data_seperated$sampleWeight )
-  PRS$controls <- wanalysis_data_seperated$controls[individuals_shuffle, ]
-  PRS$moderators <- wanalysis_data_seperated$moderators[individuals_shuffle, ]
-  PRS$outcomes <- wanalysis_data_seperated$outcomes[individuals_shuffle, ]
-  PRS$treatment <- wanalysis_data_seperated$treatment[individuals_shuffle, ]
-   
-  #Estimate propensity scores with pre-tuned parameters - fix nr of cores used before running!!
-  loop_ps_est <- ps_estimator(PRS$controls[,!names(PRS$controls) %in% c("sampleWeight")],
-                               PRS$treatment,
-                               samples = 500, #May need to check visually whether this is enough
-                               technique = "BARTMACHINE",
-                               take_means_draws = TRUE,
-                               k_fold_cv = 1,
-                               repeats = 1,
-                               k_parameter = 3,
-                               m_parameter = 50
-   )
-
-  loop_model_dataset <- make_model_matrix_1(PRS, loop_ps_est)
-
-
-  #Estimate BCF model - make sure to adapt nr of draws before doing this in BCF function
-  bcf_loop <- BCF_estimation(loop_model_dataset$outcomes, loop_model_dataset$controls, loop_model_dataset$moderators, loop_model_dataset$treatment, loop_model_dataset$ps_estimates, no_draws = drawsPL , burnin = 200 )
-
-  #Save relevant results, throw away all other data
-  return(list("PRS_results_syBP" <- t(bcf_loop$`posterior_results syBP`$tau),
-  "PRS_results_BMI" <- t(bcf_loop$`posterior_results BMI`$tau),
-  "PRS_results_waist" <- t(bcf_loop$`posterior_results waist`$tau), 
-  individuals_shuffle, 
-  loop_ps_est,
-  PRS_count))
+  library(dplyr)
+  wanalysis_data_seperated <- data_seperated_1
+  rm(list=setdiff(ls(), c("wanalysis_data_seperated", lsf.str())))
+  #Scale sample weights to sum of weights
+  totalweights <- sum(wanalysis_data_seperated$controls$sampleWeight)
+  wanalysis_data_seperated$controls <- mutate(wanalysis_data_seperated$controls, sampleWeight = sampleWeight/totalweights)
   
-  remove(c(individuals_shuffle, PRS, loop_ps_est, loop_model_dataset, bcf_loop))
+  #To save in loop
+  set.seed(13022021)
+  loopsize <- 100
+  drawsPL <- 1000
+  
+  library(foreach)
+  library(parallel)
+  library(doParallel)
+  library(doRNG)
+  #Actual loop
+  
+  cl <- parallel::makeCluster(4)
+  doParallel::registerDoParallel(cl)
+  doRNG::registerDoRNG(13022021)
+  init <- Sys.time()
+  w_an <- foreach(PRS_count=1:loopsize, .packages = c("dplyr", "forcats", "haven", "bartMachine", "bcf"),  .combine=c, .multicombine=TRUE,
+                  .init=list()) %dopar% {
+    #Generate PRS
+    PRS <- list()
+    individuals_shuffle <- sample(nrow(wanalysis_data_seperated$controls), size = nrow(wanalysis_data_seperated$controls), replace = TRUE, prob = wanalysis_data_seperated$sampleWeight )
+    PRS$controls <- wanalysis_data_seperated$controls[individuals_shuffle, ]
+    PRS$moderators <- wanalysis_data_seperated$moderators[individuals_shuffle, ]
+    PRS$outcomes <- wanalysis_data_seperated$outcomes[individuals_shuffle, ]
+    PRS$treatment <- wanalysis_data_seperated$treatment[individuals_shuffle, ]
+     
+    #Estimate propensity scores with pre-tuned parameters - fix nr of cores used before running!!
+    loop_ps_est <- ps_estimator(PRS$controls[,!names(PRS$controls) %in% c("sampleWeight")],
+                                 PRS$treatment,
+                                 samples = 500, #May need to check visually whether this is enough
+                                 technique = "BARTMACHINE",
+                                 take_means_draws = TRUE,
+                                 k_fold_cv = 1,
+                                 repeats = 1,
+                                 k_parameter = 3,
+                                 m_parameter = 50
+     )
+  
+    loop_model_dataset <- make_model_matrix_1(PRS, loop_ps_est)
   
   
-}
-
-Sys.time() - init
-stopCluster(cl)
-
-save(w_an, file = "run_10_long_sample.RData")
+    #Estimate BCF model - make sure to adapt nr of draws before doing this in BCF function
+    bcf_loop <- BCF_estimation(loop_model_dataset$outcomes, loop_model_dataset$controls, loop_model_dataset$moderators, loop_model_dataset$treatment, loop_model_dataset$ps_estimates, no_draws = drawsPL , burnin = 200 )
+  
+    #Save relevant results, throw away all other data
+    return(list("PRS_results_syBP" <- t(bcf_loop$`posterior_results syBP`$tau),
+    "PRS_results_BMI" <- t(bcf_loop$`posterior_results BMI`$tau),
+    "PRS_results_waist" <- t(bcf_loop$`posterior_results waist`$tau), 
+    individuals_shuffle, 
+    loop_ps_est,
+    PRS_count))
+    
+    remove(c(individuals_shuffle, PRS, loop_ps_est, loop_model_dataset, bcf_loop))
+    
+    
+  }
+  
+  Sys.time() - init
+  stopCluster(cl)
+  
+  save(w_an, file = "run_2_cross_sample.RData")
 
 remove(w_an)
 #Proceed only if gathered all runs
@@ -517,6 +517,10 @@ source("4_Evaluation/weighted_model_evaluation.R")
 #Obtain CATE and ITE posterior draws
 w_an_eval_prep(loopsize, drawsPL, iterations_used = 10, "cross")
 w_an_eval_prep(loopsize, drawsPL, iterations_used = 10, "long")
+
+#Obtain point estimates, CI's, plots and PD's
+w_an_eval(loopsize, drawsPL, iterations_used = 10, cross_long = "cross")
+w_an_eval(loopsize, drawsPL, iterations_used = 10, cross_long = "long")
 
 
 
