@@ -518,10 +518,26 @@ source("4_Evaluation/weighted_model_evaluation.R")
 w_an_eval_prep(loopsize, drawsPL, iterations_used = 10, "cross")
 w_an_eval_prep(loopsize, drawsPL, iterations_used = 10, "long")
 
-#Obtain point estimates, CI's, plots and PD's
-w_an_eval(loopsize, drawsPL, iterations_used = 10, cross_long = "cross")
-w_an_eval(loopsize, drawsPL, iterations_used = 10, cross_long = "long")
+#Obtain point estimates, CI's, ITE individual lists, plots and PD's
+cw_results <- w_an_eval(loopsize, drawsPL, iterations_used = 10, cross_long = "cross")
+lw_results <- w_an_eval(loopsize, drawsPL, iterations_used = 10, cross_long = "long")
 
+#Obtain summary statistics from quantiles in the ITES
+sumstats_quantiles_cr <- list()
+library(miceadds)
 
+#Obtain moderators
+load.Rdata("C_results_Weighted_Analysis/moderators_cross.RData", "moderators_cr")
+#Loop through quantiles and fill list
+for(qsel in 1:9){
+  sumstats_quantiles_cr[[qsel]] <- summary(moderators_cr[cw_results$ITES[[qsel]],]) #need to make obatinsumatsts function
+  }
+
+sumstats_quantiles_lo <- list()
+load.Rdata("C_results_Weighted_Analysis/moderators_long.RData", "moderators_lo")
+#Loop through quantiles and fill list
+for(qsel in 1:9){
+  sumstats_quantiles_lo[[qsel]] <- summary(moderators_lo[lw_results$ITES[[qsel]],]) #need to make obatinsumatsts function
+}
 
 

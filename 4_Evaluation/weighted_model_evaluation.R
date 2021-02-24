@@ -183,7 +183,7 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
     ATES[rowstofill, ] <- ATE_iteration 
     
   }
-  remove(ATE_iteration)
+ 
   
   #ATE analysis
   
@@ -236,7 +236,7 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
     
     
   }
-  remove(CATE_iteration)
+  
   
   #CATE analysis
   
@@ -294,35 +294,63 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
                                 "CATE pd" = CATE_pd)
   
   ### ITES ####
-  # 
-  # #NEED TO fix when ITE list big is created form previous one....
-  # saved_ITES <- vector()
-  # for(iteration in 1:iterations_used){
-  #   saved_ITES <- c(saved_ITES, paste("C_Results_Weighted_Analysis/ITE ", cross_long, iteration, ".RData", sep = "")) 
-  #   saved_moderators <- 
-  # }
-  # 
-  # n_ITES_PI <- drawsPL_used * loopsize_used 
-  # 
-  # 
-  # for(iteration in 1:iterations_used){
-  #   load.Rdata(saved_ITES[iteration], "ITE_iteration") 
-  #   load.Rdata(saved_moderators[iteration], "moderators")
-  #   
-  #   if(!exists("ITES")){
-  #     n_ITES_PI <- dim(ITE_iteration$syBP)[1] * drawsPL_used
-  #     ITES <- matrix(NA, iterations_used*n_ITES_PI, 3)
-  #     moderators <- rep(NA, iterations_used*n_ITES_PI, 4)
-  #   }
-  #     
-  #   rowstofill <- ((iteration - 1)* n_ITES_PI + 1):(iteration * n_ITES_PI)
-  #   ITES[rowstofill, 1] <- as.vector(ITE_iteration$syBP)
-  #   ITES[rowstofill, 2] <- as.vector(ITE_iteration$BMI)
-  #   ITES[rowstofill, 3] <- as.vector(ITE_iteration$waist) 
-  #   
-  #   moderators[rowstofill, ]
-  #  }
-  # remove(ITE_iteration)
+
+  #NEED TO fix when ITE list big is created form previous one....
+  saved_ITES <- vector()
+  for(iteration in 1:iterations_used){
+    saved_ITES <- c(saved_ITES, paste("C_Results_Weighted_Analysis/ITE ", cross_long, iteration, ".RData", sep = ""))
+  }
+
+  n_ITES_PI <- drawsPL_used * loopsize_used
+
+
+  for(iteration in 1:iterations_used){
+    load.Rdata(saved_ITES[iteration], "ITE_iteration")
+
+    if(!exists("ITES")){
+      n_ITES_PI <- dim(ITE_iteration$ITE$syBP)[1] * loopsize_used
+      ITES <- matrix(NA, iterations_used*n_ITES_PI, 3)
+      individuals <- rep(NA, iterations_used*n_ITES_PI)
+    }
+
+    rowstofill <- ((iteration - 1)* n_ITES_PI + 1):(iteration * n_ITES_PI)
+    ITES[rowstofill, 1] <- as.vector(ITE_iteration$ITE$syBP)
+    ITES[rowstofill, 2] <- as.vector(ITE_iteration$ITE$BMI)
+    ITES[rowstofill, 3] <- as.vector(ITE_iteration$ITE$waist)
+
+    individuals[rowstofill] <- as.vector(ITE_iteration$individuals)
+   }
+  
+  library(stats)
+  quantilesfu <- function(dat){
+    res <- quantile(dat, c(0.1, 0.9)) #Declare quantiles of interest
+    return(res)
+  }
+  quantiles_oi <- apply(ITES, 2, quantilesfu)
+  
+  #Select individuals from relevant parts of data
+  syBP_top_10p <- individuals[which(ITES[,1]>quantiles_oi[2,1])]
+  syBP_mid_80p <- individuals[which(ITES[,1]>quantiles_oi[1,1] & ITES[,1]<quantiles_oi[2,1])]
+  syBP_bot_10p <- individuals[which(ITES[,1]<quantiles_oi[1,1])]
+  
+  BMI_top_10p <- individuals[which(ITES[,2]>quantiles_oi[2,2])]
+  BMI_mid_80p <- individuals[which(ITES[,2]>quantiles_oi[1,2] & ITES[,2]<quantiles_oi[2,2])]
+  BMI_bot_10p <- individuals[which(ITES[,2]<quantiles_oi[1,2])]
+  
+  waist_top_10p <- individuals[which(ITES[,3]>quantiles_oi[2,3])]
+  waist_mid_80p <- individuals[which(ITES[,3]>quantiles_oi[1,3] & ITES[,3]<quantiles_oi[2,3])]
+  waist_bot_10p <- individuals[which(ITES[,3]<quantiles_oi[1,3])]
+  
+  resultslist[["ITES"]] <- list("syBPtop10" = syBP_top_10p,
+                                "syBPmid80" = syBP_mid_80p,
+                                "syBPbot10" = syBP_bot_10p,
+                                "BMItop10" = BMI_top_10p,
+                                "BMImid80" = BMI_mid_80p,
+                                "BMIbot10" = BMI_bot_10p,
+                                "waisttop10" = waist_top_10p,
+                                "waistmid80" = waist_mid_80p,
+                                "waistbot10" = waist_bot_10p
+                                )
   
   return(resultslist)
   
