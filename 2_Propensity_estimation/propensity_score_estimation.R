@@ -97,7 +97,7 @@ ps_estimator <-
         
         #Make sure train and test predictors are dataframe (unlist function)
         
-        #Actual estimation - default method is BART
+        #Actual estimation - default method is BART #OLD - not used in thesis report
         if (technique == "BART") {
           library(BART)
           
