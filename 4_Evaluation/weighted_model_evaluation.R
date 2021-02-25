@@ -188,7 +188,11 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
   #ATE analysis
   
   ATE_point_estimates <- apply(ATES, 2, mean)
-  ATE_CIs <- apply(ATES, 2, ci)
+  
+  ci_hdi <- function(dat){
+    res <- bayestestR::ci(dat, method = "HDI")
+  }
+  ATE_CIs <- apply(ATES, 2, ci_hdi)
   
   ATE_CI_plot_syBP <- plot(ATE_CIs[[1]], ATES[,1], show_zero = TRUE)
   ATE_CI_plot_BMI <- plot(ATE_CIs[[2]], ATES[,2], show_zero = TRUE)
@@ -209,11 +213,13 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
   #ATE_plots <- plot(ATES_estimates)
   
   ATE_pd <- p_direction(as.data.frame(ATES))
+  ATE_median <- apply(ATES, 2, median)
   
   resultslist[["ATES"]] <- list("ATE point estimates" = ATE_point_estimates, 
                                 "ATE CIs" = ATE_CIs, 
                                 "ATE CI plots" = list("syBP" = ATE_CI_plot_syBP, "BMI" = ATE_CI_plot_BMI, "waist" = ATE_CI_plot_waist),
-                                "ATE pd" = ATE_pd)
+                                "ATE pd" = ATE_pd,
+                                "ATES median" = ATE_median)
 
   #CATES####
   saved_CATES <- vector()
@@ -241,7 +247,7 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
   #CATE analysis
   
   CATE_point_estimates <- apply(CATES, 2, mean)
-  CATE_CIs <- apply(CATES, 2, ci)
+  CATE_CIs <- apply(CATES, 2, ci_hdi)
   
   white_CATE_CI_plot_syBP <- plot(CATE_CIs[[1]], CATES[,1], show_zero = TRUE)
   white_CATE_CI_plot_BMI <- plot(CATE_CIs[[2]], CATES[,2], show_zero = TRUE)
@@ -282,6 +288,7 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
   #CATE_plots <- plot(CATES_estimates)
   
   CATE_pd <- p_direction(as.data.frame(CATES))
+  CATE_median <- apply(CATES,2,median)
   
   resultslist[["CATES"]] <- list("CATE point estimates" = CATE_point_estimates, 
                                 "CATE CIs" = CATE_CIs, 
@@ -291,7 +298,8 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
                                                        "male" = list("syBP" = male_CATE_CI_plot_syBP, "BMI" = male_CATE_CI_plot_BMI, "waist" = male_CATE_CI_plot_waist),
                                                        "female" = list("syBP" = female_CATE_CI_plot_syBP, "BMI" = female_CATE_CI_plot_BMI, "waist" = female_CATE_CI_plot_waist)
                                                        ),
-                                "CATE pd" = CATE_pd)
+                                "CATE pd" = CATE_pd,
+                                "CATE median" = CATE_median)
   
   ### ITES ####
 
@@ -341,6 +349,18 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
   waist_mid_80p <- individuals[which(ITES[,3]>quantiles_oi[1,3] & ITES[,3]<quantiles_oi[2,3])]
   waist_bot_10p <- individuals[which(ITES[,3]<quantiles_oi[1,3])]
   
+  syBP_top_10p_av <- apply(ITES[which(ITES[,1]>quantiles_oi[2,1]),],2, mean)
+  syBP_mid_80p_av <- apply(ITES[which(ITES[,1]>quantiles_oi[1,1] & ITES[,1]<quantiles_oi[2,1]),],2, mean)
+  syBP_bot_10p_av <- apply(ITES[which(ITES[,1]<quantiles_oi[1,1]),],2, mean)
+  
+  BMI_top_10p_av <- apply(ITES[which(ITES[,2]>quantiles_oi[2,2]),],2, mean)
+  BMI_mid_80p_av <- apply(ITES[which(ITES[,2]>quantiles_oi[1,2] & ITES[,2]<quantiles_oi[2,2]),],2, mean)
+  BMI_bot_10p_av <- apply(ITES[which(ITES[,2]<quantiles_oi[1,2]),],2, mean)
+  
+  waist_top_10p_av <- apply(ITES[which(ITES[,3]>quantiles_oi[2,3]),],2, mean)
+  waist_mid_80p_av <- apply(ITES[which(ITES[,3]>quantiles_oi[1,3] & ITES[,3]<quantiles_oi[2,3]),],2, mean)
+  waist_bot_10p_av <-apply(ITES[which(ITES[,3]<quantiles_oi[1,3]),],2, mean)
+  
   resultslist[["ITES"]] <- list("syBPtop10" = syBP_top_10p,
                                 "syBPmid80" = syBP_mid_80p,
                                 "syBPbot10" = syBP_bot_10p,
@@ -349,7 +369,16 @@ w_an_eval <-  function(loopsize_used, drawsPL_used, iterations_used, cross_long 
                                 "BMIbot10" = BMI_bot_10p,
                                 "waisttop10" = waist_top_10p,
                                 "waistmid80" = waist_mid_80p,
-                                "waistbot10" = waist_bot_10p
+                                "waistbot10" = waist_bot_10p,
+                                "syBPtop10_av" = syBP_top_10p_av,
+                                "syBPmid80_av" = syBP_mid_80p_av,
+                                "syBPbot10_av" = syBP_bot_10p_av,
+                                "BMItop10_av" = BMI_top_10p_av,
+                                "BMImid80_av" = BMI_mid_80p_av,
+                                "BMIbot10_av" = BMI_bot_10p_av,
+                                "waisttop10_av" = waist_top_10p_av,
+                                "waistmid80_av" = waist_mid_80p_av,
+                                "waistbot10_av" = waist_bot_10p_av
                                 )
   
   return(resultslist)

@@ -524,20 +524,26 @@ lw_results <- w_an_eval(loopsize, drawsPL, iterations_used = 10, cross_long = "l
 
 #Obtain summary statistics from quantiles in the ITES
 sumstats_quantiles_cr <- list()
+wealthbins_cr <- matrix(NA, 9, 10)
 library(miceadds)
 
 #Obtain moderators
 load.Rdata("C_results_Weighted_Analysis/moderators_cross.RData", "moderators_cr")
 #Loop through quantiles and fill list
 for(qsel in 1:9){
-  sumstats_quantiles_cr[[qsel]] <- summary(moderators_cr[cw_results$ITES[[qsel]],]) #need to make obatinsumatsts function
+  sumstats_quantiles_cr[[qsel]] <- summary(moderators_cr[cw_results$ITES[[qsel]],])
+  wealthbins_cr[qsel,] <- table(moderators_cr$wealth_bin[cw_results$ITES[[qsel]]])/sum(table(moderators_cr$wealth_bin[cw_results$ITES[[qsel]]]))
   }
 
 sumstats_quantiles_lo <- list()
+wealthbins_lo <- matrix(NA, 9, 10)
+
 load.Rdata("C_results_Weighted_Analysis/moderators_long.RData", "moderators_lo")
 #Loop through quantiles and fill list
 for(qsel in 1:9){
-  sumstats_quantiles_lo[[qsel]] <- summary(moderators_lo[lw_results$ITES[[qsel]],]) #need to make obatinsumatsts function
+  sumstats_quantiles_lo[[qsel]] <- summary(moderators_lo[lw_results$ITES[[qsel]],]) 
+  wealthbins_lo[qsel,] <- table(moderators_lo$wealth_bin[lw_results$ITES[[qsel]]])/sum(table(moderators_lo$wealth_bin[lw_results$ITES[[qsel]]]))
+  
 }
 
 
