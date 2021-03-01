@@ -995,36 +995,38 @@ impute_missings_additional_vars <- function(dat = seperated_dataset){
 }
 
 
-#' racial_discrimination_analysis
+#' discussion_variables
 #' 
 #' @description Provides analysis on racial discrimination seperately
 #' 
-#' Output: @return analysis_racial_discrimination
-#' Input: @param data dataframe with racial discrimination data
-#' @param method .... method used to do this analysis
-#' @param choices ... choices of what analysis to do 
-racial_discrimination_analysis <- function(data = racial_discrimination_data, method = "Proposal", choices = "All" ){
+#' Output: @return discussion_dataset
+#' Input: @param analysis_dataset dataframe with all data including the unprepared but named discusison variables
+discussion_variables <- function(data = analysis_dataset){
+ 
+  discussion_dataset <- analysis_dataset
   
-}
-
-#' general_data_analysis
-#' 
-#' General data anslysis that provides summary tables and other things if needed
-#' 
-#' Output: @return general_analysis
-#' Input: @param input_data ... input data
-#' @param choices ... choices of analysis to do c(means, median etc)
-general_data_analysis <- function(input_data = data_to_analyse, choices = "All"){
+  #Gripstrength
+  discussion_dataset <-
+    mutate(discussion_dataset, lefthandfirst = ifelse((lefthandfirst == 993 |
+                                                     lefthandfirst == 998 | lefthandfirst == 999), NA, lefthandfirst))
   
-}
-
-#' missing_data_analysis
-#' 
-#' @description Analysis of missing data and possible imputation if user provided
-#' 
-#' Output: @return missing_data_analysis
-#' Input: @param missing_data ... data with missings
-#' @param imputation ... imputation method
-missing_data_analysis <- function(missing_data = missing_data, imputation = "Multiple imputation"){
+  discussion_dataset <-
+    mutate(discussion_dataset, righthandfirst = ifelse((righthandfirst == 993 |
+                                                          righthandfirst == 998 | righthandfirst == 999), NA, righthandfirst))
+  discussion_dataset <-
+    mutate(discussion_dataset, lefthandsecond = ifelse((lefthandsecond == 993 |
+                                                          lefthandsecond == 998 | lefthandsecond == 999), NA, lefthandsecond))
+  discussion_dataset <-
+    mutate(discussion_dataset, righthandsecond = ifelse((righthandsecond == 993 |
+                                                           righthandsecond == 998 | righthandsecond == 999), NA, righthandsecond))
+  discussion_dataset <- discussion_dataset %>% 
+    rowwise() %>% 
+    mutate(gripstrength = ifelse((gripDom == 1), mean(c(righthandfirst, righthandsecond), na.rm = TRUE), ifelse(gripDom == 2, mean(c(lefthandfirst, lefthandsecond), na.rm = TRUE), NA)))
   
+  discussion_dataset <- 
+    mutate(discussion_dataset, timeseendoctor = ifelse((timeseendoctor == 998 |
+                                                          timeseendoctor == 999), NA, timeseendoctor))
+  
+  
+   return(discussion_dataset) 
 }

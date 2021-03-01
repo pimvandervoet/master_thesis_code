@@ -475,7 +475,7 @@ save.image("unweighted_analysis_results.RData")
     #Estimate propensity scores with pre-tuned parameters - fix nr of cores used before running!!
     loop_ps_est <- ps_estimator(PRS$controls[,!names(PRS$controls) %in% c("sampleWeight")],
                                  PRS$treatment,
-                                 samples = 500, #May need to check visually whether this is enough
+                                 samples = 500, 
                                  technique = "BARTMACHINE",
                                  take_means_draws = TRUE,
                                  k_fold_cv = 1,
