@@ -1,1 +1,2 @@
 # master_thesis_code
+All the code for the core analyses of the thesis can be run from thesis_main.R, and the code used in the discussion can be run from discussion.R. All other R and STATA files are auxiliary files that contain functions used in the analysis. Programming_admin.xlsx contains the tables that are provided in this thesis. 
