@@ -45,7 +45,7 @@ controlvariables_1 <-
   c(
     "sampleWeight",
     "sex",
-    "race",
+    "age",
     "wealth_bin",
     "age",
     "moEducation",
@@ -76,7 +76,7 @@ controlvariables_1 <-
     "milAct"
   )
 
-moderatorvariables_1 <- c("sex", "race", "wealth_bin", "age")
+moderatorvariables_1 <- c("sex", "age", "wealth_bin", "age")
 outcomevariables_1 <- c("syBP_mean", "BMI", "waist")
 treatmentvariables_1 <- c("expRDAll")
 
@@ -150,14 +150,14 @@ weighted_means_1 <-
     "waist nt" = weighted.mean(data_seperated_d$outcomes$waist[non_treated_1], weightvector_1[non_treated_1]),
     "grip nt" = weighted.mean(data_seperated_d$outcomes$gripstrength[non_treated_1], weightvector_1[non_treated_1], na.rm = TRUE),
     "doctor nt" = weighted.mean(data_seperated_d$controls$timeseendoctor[non_treated_1], weightvector_1[non_treated_1], na.rm = TRUE),
-    "grip white" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$race == "1.white/caucasian")], na.rm = TRUE),
-    "grip black" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$race == "2.black/african american")], na.rm = TRUE),
-    "grip other" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "3.other")], weightvector_1[which(data_seperated_d$moderators$race == "3.other")], na.rm = TRUE),
+    "grip white" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$age == "1.white/caucasian")], na.rm = TRUE),
+    "grip black" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$age == "2.black/african american")], na.rm = TRUE),
+    "grip other" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "3.other")], weightvector_1[which(data_seperated_d$moderators$age == "3.other")], na.rm = TRUE),
     "grip male" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$sex == 1)], weightvector_1[which(data_seperated_d$moderators$sex == 1)], na.rm = TRUE),
     "grip female" = weighted.mean(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$sex == 0)], weightvector_1[which(data_seperated_d$moderators$sex == 0)], na.rm = TRUE),
-    "doctor white" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$race == "1.white/caucasian")], na.rm = TRUE),
-    "doctor black" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$race == "2.black/african american")], na.rm = TRUE),
-    "doctor other" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "3.other")], weightvector_1[which(data_seperated_d$moderators$race == "3.other")], na.rm = TRUE),
+    "doctor white" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$age == "1.white/caucasian")], na.rm = TRUE),
+    "doctor black" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$age == "2.black/african american")], na.rm = TRUE),
+    "doctor other" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "3.other")], weightvector_1[which(data_seperated_d$moderators$age == "3.other")], na.rm = TRUE),
     "doctor male" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$sex == 1)], weightvector_1[which(data_seperated_d$moderators$sex == 1)], na.rm = TRUE),
     "doctor female" = weighted.mean(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$sex == 0)], weightvector_1[which(data_seperated_d$moderators$sex == 0)], na.rm = TRUE)
   )
@@ -177,14 +177,14 @@ weighted_sd_1 <-
     "waist nt" = weighted.sd(data_seperated_d$outcomes$waist[non_treated_1], weightvector_1[non_treated_1]),
     "grip nt" = weighted.sd(data_seperated_d$outcomes$gripstrength[non_treated_1], weightvector_1[non_treated_1], na.rm = TRUE),
     "doctor nt" = weighted.sd(data_seperated_d$controls$timeseendoctor[non_treated_1], weightvector_1[non_treated_1], na.rm = TRUE),
-    "grip white" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$race == "1.white/caucasian")], na.rm = TRUE),
-    "grip black" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$race == "2.black/african american")], na.rm = TRUE),
-    "grip other" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "3.other")], weightvector_1[which(data_seperated_d$moderators$race == "3.other")], na.rm = TRUE),
+    "grip white" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$age == "1.white/caucasian")], na.rm = TRUE),
+    "grip black" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$age == "2.black/african american")], na.rm = TRUE),
+    "grip other" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "3.other")], weightvector_1[which(data_seperated_d$moderators$age == "3.other")], na.rm = TRUE),
     "grip male" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$sex == 1)], weightvector_1[which(data_seperated_d$moderators$sex == 1)], na.rm = TRUE),
     "grip female" = weighted.sd(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$sex == 0)], weightvector_1[which(data_seperated_d$moderators$sex == 0)], na.rm = TRUE),
-    "doctor white" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$race == "1.white/caucasian")], na.rm = TRUE),
-    "doctor black" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$race == "2.black/african american")], na.rm = TRUE),
-    "doctor other" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "3.other")], weightvector_1[which(data_seperated_d$moderators$race == "3.other")], na.rm = TRUE),
+    "doctor white" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$age == "1.white/caucasian")], na.rm = TRUE),
+    "doctor black" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$age == "2.black/african american")], na.rm = TRUE),
+    "doctor other" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "3.other")], weightvector_1[which(data_seperated_d$moderators$age == "3.other")], na.rm = TRUE),
     "doctor male" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$sex == 1)], weightvector_1[which(data_seperated_d$moderators$sex == 1)], na.rm = TRUE),
     "doctor female" = weighted.sd(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$sex == 0)], weightvector_1[which(data_seperated_d$moderators$sex == 0)], na.rm = TRUE)
     
@@ -208,15 +208,48 @@ weighted_median_1 <-
     "waist nt" = weighted.median(data_seperated_d$outcomes$waist[non_treated_1], weightvector_1[non_treated_1]),
     "grip nt" = weighted.median(data_seperated_d$outcomes$gripstrength[non_treated_1], weightvector_1[non_treated_1], na.rm = TRUE),
     "doctor nt" = weighted.median(data_seperated_d$controls$timeseendoctor[non_treated_1], weightvector_1[non_treated_1], na.rm = TRUE),
-    "grip white" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$race == "1.white/caucasian")], na.rm = TRUE),
-    "grip black" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$race == "2.black/african american")], na.rm = TRUE),
-    "grip other" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$race == "3.other")], weightvector_1[which(data_seperated_d$moderators$race == "3.other")], na.rm = TRUE),
+    "grip white" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$age == "1.white/caucasian")], na.rm = TRUE),
+    "grip black" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$age == "2.black/african american")], na.rm = TRUE),
+    "grip other" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$age == "3.other")], weightvector_1[which(data_seperated_d$moderators$age == "3.other")], na.rm = TRUE),
     "grip male" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$sex == 1)], weightvector_1[which(data_seperated_d$moderators$sex == 1)], na.rm = TRUE),
     "grip female" = weighted.median(data_seperated_d$outcomes$gripstrength[which(data_seperated_d$moderators$sex == 0)], weightvector_1[which(data_seperated_d$moderators$sex == 0)], na.rm = TRUE),
-    "doctor white" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$race == "1.white/caucasian")], na.rm = TRUE),
-    "doctor black" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$race == "2.black/african american")], na.rm = TRUE),
-    "doctor other" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$race == "3.other")], weightvector_1[which(data_seperated_d$moderators$race == "3.other")], na.rm = TRUE),
+    "doctor white" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "1.white/caucasian")], weightvector_1[which(data_seperated_d$moderators$age == "1.white/caucasian")], na.rm = TRUE),
+    "doctor black" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "2.black/african american")], weightvector_1[which(data_seperated_d$moderators$age == "2.black/african american")], na.rm = TRUE),
+    "doctor other" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$age == "3.other")], weightvector_1[which(data_seperated_d$moderators$age == "3.other")], na.rm = TRUE),
     "doctor male" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$sex == 1)], weightvector_1[which(data_seperated_d$moderators$sex == 1)], na.rm = TRUE),
     "doctor female" = weighted.median(data_seperated_d$controls$timeseendoctor[which(data_seperated_d$moderators$sex == 0)], weightvector_1[which(data_seperated_d$moderators$sex == 0)], na.rm = TRUE)
     
   )
+
+
+
+####PART of missingness tests
+
+###Data loading and preperation####
+#Set working directory=
+library(stargazer)
+library(stats)
+data_seperated_1 <- data_seperator(analysis_dataset, controlvariables_1, moderatorvariables_1, treatmentvariables_1, outcomevariables_1)
+data_seperated_1 <- remove_NA_outcomes(data_seperated_1)
+
+
+missing_age <- rep(0, dim(data_seperated_1$moderators)[1])
+missing_age[which(is.na(data_seperated_1$moderators$age))] <- 1
+missing_age <- as.factor(missing_age)
+
+missing_wealth <-  rep(0, dim(data_seperated_1$moderators)[1])
+missing_wealth[which(is.na(data_seperated_1$moderators$wealth_bin))] <- 1
+missing_wealth <- as.factor(missing_wealth)
+
+missing_race <- rep(0, dim(data_seperated_1$moderators)[1])
+missing_race[which(is.na(data_seperated_1$moderators$race))] <- 1
+missing_race <- as.factor(missing_race)
+
+#Logit models on missing values there where all other variables are observed
+logitmodel_age <- glm(missing_age ~ . ,data = as.data.frame(cbind(missing_age, data_seperated_1$moderators[,c("wealth_bin", "race", "sex")])), family = "binomial")
+logitmodel_wealth <- glm(missing_wealth ~ . ,data = as.data.frame(cbind(missing_wealth, data_seperated_1$moderators[,c("age", "race", "sex")])), family = "binomial")
+logitmodel_race <- glm(missing_race ~ . ,data = as.data.frame(cbind(missing_race, data_seperated_1$moderators[,c("wealth_bin", "age", "sex")])), family = "binomial")
+
+
+stargazer(logitmodel_age, logitmodel_race, logitmodel_wealth, title="Results", align=TRUE)
+
