@@ -35,8 +35,13 @@ a <- ggplot(CATES_BMI, aes(x = CATES))
 a + geom_density()
 a + geom_density(aes(fill = Race), alpha = 0.4)
 mu <- CATES_BMI %>% group_by(Race) %>% summarize(grp.mean = mean(CATES))
-a + geom_density(aes(fill = Race), alpha = 0.4) + geom_vline(data = mu, aes(xintercept = grp.mean, color = Race), linetype = "dashed") + ylab("Posterior Probability Density") + xlab("CATE perceived racial discrimination on BMI")
+plot_cross_sectional <- a + geom_density(aes(fill = Race), alpha = 0.4) + geom_vline(data = mu, aes(xintercept = grp.mean, color = Race), linetype = "dashed") + ylab("Posterior Probability Density") + xlab("CATE perceived racial discrimination on BMI")
 
+plot_cross_sectional <- plot_cross_sectional + theme(legend.title = element_text(size = 20),
+                                       legend.text = element_text(size = 20), axis.text=element_text(size=14), axis.title=element_text(size=20))
+ggsave(filename = "CATES_unw.eps",
+       plot = print(plot_cross_sectional),
+       device = cairo_ps)
 
 #BMI PLOT CROSS SECTIONAL by race weighted
 
@@ -74,9 +79,17 @@ for(i in 1:PRS_iterations){
 CATES_BMI_w$CATES <- as.numeric(CATES_BMI_w$CATES)
 a <- ggplot(CATES_BMI_w, aes(x = CATES))
 a + geom_density()
-a + geom_density(aes(fill = Race), alpha = 0)
-mu <- CATES_BMI %>% group_by(Race) %>% summarize(grp.mean = mean(CATES))
-plot_weighted <- a + geom_density(aes(fill = Race), alpha = 0) + geom_vline(data = mu, aes(xintercept = grp.mean, color = Race), linetype = "dashed") + ylab("Posterior Probability Density") + xlab("CATE perceived racial discrimination on BMI")
+a + geom_density(aes(fill = Race), alpha = 0.3)
+mu <- CATES_BMI_w %>% group_by(Race) %>% summarize(grp.mean = mean(CATES))
+plot_weighted <- a + geom_density(aes(fill = Race), alpha = 0.3) + geom_vline(data = mu, aes(xintercept = grp.mean, color = Race), linetype = "dashed") + ylab("Posterior Probability Density") + xlab("CATE perceived racial discrimination on BMI")
+#mu$Race <- as.factor(mu$Race)
+#plot_weighted <- plot_weighted + scale_fill_discrete(breaks = rev(c(levels(mu$Race)[3], levels(mu$Race)[1], levels(mu$Race[2]))))
+plot_weighted <- plot_weighted + theme(legend.title = element_text(size = 20),
+legend.text = element_text(size = 20), axis.text=element_text(size=14), axis.title=element_text(size=20))
+
+ggsave(filename = "CATES_weighted.eps",
+       plot = print(plot_weighted),
+       device = cairo_ps)
 
 #Code below also highlights the credibility intervals for the distributions
 
