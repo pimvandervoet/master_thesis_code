@@ -141,7 +141,12 @@ weighted_means_1 <-  c("sex tr" = weighted.mean(data_seperated_1$moderators$sex[
                      "age nt" = weighted.mean(data_seperated_1$moderators$age[non_treated_1 ], weightvector_1[non_treated_1 ]),
                      "syBP nt" = weighted.mean(data_seperated_1$outcomes$syBP_mean[non_treated_1 ], weightvector_1[non_treated_1 ]),
                      "BMI nt"  = weighted.mean(data_seperated_1$outcomes$BMI[non_treated_1 ], weightvector_1[non_treated_1 ]),
-                     "waist nt" = weighted.mean(data_seperated_1$outcomes$waist[non_treated_1 ], weightvector_1[non_treated_1 ])
+                     "waist nt" = weighted.mean(data_seperated_1$outcomes$waist[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                     "sex all" = weighted.mean(data_seperated_1$moderators$sex, weightvector_1),
+                     "age all" = weighted.mean(data_seperated_1$moderators$age, weightvector_1),
+                     "syBP all" = weighted.mean(data_seperated_1$outcomes$syBP_mean, weightvector_1),
+                     "BMI all"  = weighted.mean(data_seperated_1$outcomes$BMI, weightvector_1),
+                     "waist all" = weighted.mean(data_seperated_1$outcomes$waist, weightvector_1)
 )
 weighted_sd_1 <-  c("sex tr" = weighted.sd(data_seperated_1$moderators$sex[treated_1 ], weightvector_1[treated_1 ]),
                        "age tr" = weighted.sd(data_seperated_1$moderators$age[treated_1 ], weightvector_1[treated_1 ]),
@@ -152,7 +157,12 @@ weighted_sd_1 <-  c("sex tr" = weighted.sd(data_seperated_1$moderators$sex[treat
                        "age nt" = weighted.sd(data_seperated_1$moderators$age[non_treated_1 ], weightvector_1[non_treated_1 ]),
                        "syBP nt" = weighted.sd(data_seperated_1$outcomes$syBP_mean[non_treated_1 ], weightvector_1[non_treated_1 ]),
                        "BMI nt"  = weighted.sd(data_seperated_1$outcomes$BMI[non_treated_1 ], weightvector_1[non_treated_1 ]),
-                       "waist nt" = weighted.sd(data_seperated_1$outcomes$waist[non_treated_1 ], weightvector_1[non_treated_1 ])
+                       "waist nt" = weighted.sd(data_seperated_1$outcomes$waist[non_treated_1 ], weightvector_1[non_treated_1 ]),
+                    "sex all" = weighted.sd(data_seperated_1$moderators$sex, weightvector_1),
+                    "age all" = weighted.sd(data_seperated_1$moderators$age, weightvector_1),
+                    "syBP all" = weighted.sd(data_seperated_1$outcomes$syBP_mean, weightvector_1),
+                    "BMI all"  = weighted.sd(data_seperated_1$outcomes$BMI, weightvector_1),
+                    "waist all" = weighted.sd(data_seperated_1$outcomes$waist, weightvector_1)
 )
 
 
@@ -181,7 +191,20 @@ counts_1 <- c("white_tr" = sum(weightvector_1[intersect(which(data_seperated_1$m
               "wb7_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "7"), non_treated_1)]),
               "wb8_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "8"), non_treated_1)]),
               "wb9_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "9"), non_treated_1)]),
-              "wb10_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "10"), non_treated_1)])
+              "wb10_nt" = sum(weightvector_1[intersect(which(data_seperated_1$moderators$wealth_bin == "10"), non_treated_1)]),
+              "white_all" = sum(weightvector_1[which(data_seperated_1$moderators$race == "1.white/caucasian")]),
+              "black_all" = sum(weightvector_1[which(data_seperated_1$moderators$race == "2.black/african american")]),
+              "other_all" = sum(weightvector_1[which(data_seperated_1$moderators$race == "3.other")]),
+              "wb1_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "1")]),
+              "wb2_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "2")]),
+              "wb3_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "3")]),
+              "wb4_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "4")]),
+              "wb5_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "5")]),
+              "wb6_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "6")]),
+              "wb7_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "7")]),
+              "wb8_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "8")]),
+              "wb9_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "9")]),
+              "wb10_all" = sum(weightvector_1[which(data_seperated_1$moderators$wealth_bin == "10")])
               )
 
 
@@ -198,7 +221,12 @@ weighted_means_2 <-  c("sex tr" = weighted.mean(data_seperated_2$moderators$sex[
                        "age nt" = weighted.mean(data_seperated_2$moderators$age[non_treated_2 ], weightvector_2[non_treated_2 ]),
                        "syBP nt" = weighted.mean(data_seperated_2$outcomes$d_syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
                        "BMI nt"  = weighted.mean(data_seperated_2$outcomes$d_BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                       "waist nt" = weighted.mean(data_seperated_2$outcomes$d_waist[non_treated_2 ], weightvector_2[non_treated_2 ])
+                       "waist nt" = weighted.mean(data_seperated_2$outcomes$d_waist[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                       "sex all" = weighted.mean(data_seperated_2$moderators$sex, weightvector_2),
+                       "age all" = weighted.mean(data_seperated_2$moderators$age, weightvector_2),
+                       "syBP all" = weighted.mean(data_seperated_2$outcomes$d_syBP_mean, weightvector_2),
+                       "BMI all"  = weighted.mean(data_seperated_2$outcomes$d_BMI, weightvector_2),
+                       "waist all" = weighted.mean(data_seperated_2$outcomes$d_waist, weightvector_2)
 )
 weighted_sd_2 <-  c("sex tr" = weighted.sd(data_seperated_2$moderators$sex[treated_2 ], weightvector_2[treated_2 ]),
                     "age tr" = weighted.sd(data_seperated_2$moderators$age[treated_2 ], weightvector_2[treated_2 ]),
@@ -209,7 +237,12 @@ weighted_sd_2 <-  c("sex tr" = weighted.sd(data_seperated_2$moderators$sex[treat
                     "age nt" = weighted.sd(data_seperated_2$moderators$age[non_treated_2 ], weightvector_2[non_treated_2 ]),
                     "syBP nt" = weighted.sd(data_seperated_2$outcomes$d_syBP_mean[non_treated_2 ], weightvector_2[non_treated_2 ]),
                     "BMI nt"  = weighted.sd(data_seperated_2$outcomes$d_BMI[non_treated_2 ], weightvector_2[non_treated_2 ]),
-                    "waist nt" = weighted.sd(data_seperated_2$outcomes$d_waist[non_treated_2 ], weightvector_2[non_treated_2 ])
+                    "waist nt" = weighted.sd(data_seperated_2$outcomes$d_waist[non_treated_2 ], weightvector_2[non_treated_2 ]),
+                    "sex all" = weighted.sd(data_seperated_2$moderators$sex, weightvector_2),
+                    "age all" = weighted.sd(data_seperated_2$moderators$age, weightvector_2),
+                    "syBP all" = weighted.sd(data_seperated_2$outcomes$d_syBP_mean, weightvector_2),
+                    "BMI all"  = weighted.sd(data_seperated_2$outcomes$d_BMI, weightvector_2),
+                    "waist all" = weighted.sd(data_seperated_2$outcomes$d_waist, weightvector_2)
 )
 
 
@@ -238,7 +271,20 @@ counts_2 <- c("white_tr" = sum(weightvector_2[intersect(which(data_seperated_2$m
               "wb7_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "7"), non_treated_2)]),
               "wb8_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "8"), non_treated_2)]),
               "wb9_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "9"), non_treated_2)]),
-              "wb10_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "10"), non_treated_2)])
+              "wb10_nt" = sum(weightvector_2[intersect(which(data_seperated_2$moderators$wealth_bin == "10"), non_treated_2)]),
+              "white_all" = sum(weightvector_2[which(data_seperated_2$moderators$race == "1.white/caucasian")]),
+              "black_all" = sum(weightvector_2[which(data_seperated_2$moderators$race == "2.black/african american")]),
+              "other_all" = sum(weightvector_2[which(data_seperated_2$moderators$race == "3.other")]),
+              "wb1_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "1")]),
+              "wb2_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "2")]),
+              "wb3_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "3")]),
+              "wb4_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "4")]),
+              "wb5_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "5")]),
+              "wb6_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "6")]),
+              "wb7_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "7")]),
+              "wb8_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "8")]),
+              "wb9_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "9")]),
+              "wb10_all" = sum(weightvector_2[which(data_seperated_2$moderators$wealth_bin == "10")])
 )
 
 

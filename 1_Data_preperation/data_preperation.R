@@ -1007,21 +1007,42 @@ discussion_variables <- function(data = analysis_dataset){
   
   #Gripstrength
   discussion_dataset <-
-    mutate(discussion_dataset, lefthandfirst = ifelse((lefthandfirst == 993 |
-                                                     lefthandfirst == 998 | lefthandfirst == 999), NA, lefthandfirst))
+    mutate(discussion_dataset, lefthandfirst16 = ifelse((lefthandfirst16 == 993 |
+                                                     lefthandfirst16 == 998 | lefthandfirst16 == 999), NA, lefthandfirst16))
   
   discussion_dataset <-
-    mutate(discussion_dataset, righthandfirst = ifelse((righthandfirst == 993 |
-                                                          righthandfirst == 998 | righthandfirst == 999), NA, righthandfirst))
+    mutate(discussion_dataset, righthandfirst16 = ifelse((righthandfirst16 == 993 |
+                                                          righthandfirst16 == 998 | righthandfirst16 == 999), NA, righthandfirst16))
   discussion_dataset <-
-    mutate(discussion_dataset, lefthandsecond = ifelse((lefthandsecond == 993 |
-                                                          lefthandsecond == 998 | lefthandsecond == 999), NA, lefthandsecond))
+    mutate(discussion_dataset, lefthandsecond16 = ifelse((lefthandsecond16 == 993 |
+                                                          lefthandsecond16 == 998 | lefthandsecond16 == 999), NA, lefthandsecond16))
   discussion_dataset <-
-    mutate(discussion_dataset, righthandsecond = ifelse((righthandsecond == 993 |
-                                                           righthandsecond == 998 | righthandsecond == 999), NA, righthandsecond))
+    mutate(discussion_dataset, righthandsecond16 = ifelse((righthandsecond16 == 993 |
+                                                           righthandsecond16 == 998 | righthandsecond16 == 999), NA, righthandsecond16))
   discussion_dataset <- discussion_dataset %>% 
     rowwise() %>% 
-    mutate(gripstrength = ifelse((gripDom == 1), mean(c(righthandfirst, righthandsecond), na.rm = TRUE), ifelse(gripDom == 2, mean(c(lefthandfirst, lefthandsecond), na.rm = TRUE), NA)))
+    mutate(gripstrength16 = ifelse((gripDom16 == 1), mean(c(righthandfirst16, righthandsecond16), na.rm = TRUE), ifelse(gripDom16 == 2, mean(c(lefthandfirst16, lefthandsecond16), na.rm = TRUE), NA)))
+  
+  discussion_dataset <-
+    mutate(discussion_dataset, lefthandfirst12 = ifelse((lefthandfirst12 == 993 |
+                                                         lefthandfirst12 == 998 | lefthandfirst12 == 999), NA, lefthandfirst12))
+  
+  discussion_dataset <-
+    mutate(discussion_dataset, righthandfirst12 = ifelse((righthandfirst12 == 993 |
+                                                          righthandfirst12 == 998 | righthandfirst12 == 999), NA, righthandfirst12))
+  discussion_dataset <-
+    mutate(discussion_dataset, lefthandsecond12 = ifelse((lefthandsecond12 == 993 |
+                                                          lefthandsecond12 == 998 | lefthandsecond12 == 999), NA, lefthandsecond12))
+  discussion_dataset <-
+    mutate(discussion_dataset, righthandsecond12 = ifelse((righthandsecond12 == 993 |
+                                                           righthandsecond12 == 998 | righthandsecond12 == 999), NA, righthandsecond12))
+  discussion_dataset <- discussion_dataset %>% 
+    rowwise() %>% 
+    mutate(gripstrength12 = ifelse((gripDom12 == 1), mean(c(righthandfirst12, righthandsecond12), na.rm = TRUE), ifelse(gripDom12 == 2, mean(c(lefthandfirst12, lefthandsecond12), na.rm = TRUE), NA)))
+  
+  discussion_dataset <- discussion_dataset %>%
+    rowwise() %>%
+    mutate(gripstrengthdif = gripstrength16 - gripstrength12)
   
   discussion_dataset <- 
     mutate(discussion_dataset, timeseendoctor = ifelse((timeseendoctor == 998 |
