@@ -15,7 +15,7 @@ save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_
 *C) Load Fat file 2012, select variables
 
 use "C:\Users\pimva\Documents\Studie\Thesis\Programming\A_Data_sources\h12f2a.dta"
-keep ni859 ni864 ni869 ni907 ni834 ni841 nc118 hhidpn
+keep ni859 ni864 ni869 ni907 ni834 ni841 nc118 ni815 ni816 ni851 ni852 ni853 hhidpn
 
 save C:\Users\pimva\Documents\Studie\Thesis\Programming\0_Data_loading\variable_selection_fat_file_2012_discussion
 
